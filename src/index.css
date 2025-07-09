@@ -1,0 +1,430 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * PalmAstro - AI-Powered Palmistry & Astrology Platform
+   * Light theme with vibrant colors and excellent readability
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+  */
+  :root {
+    /* Base colors - Consistent with homepage banner (slate-900, purple-900, blue-900) */
+    --background: 222 84% 4%;
+    --foreground: 248 250 252;
+
+    --card: 222 84% 4%;
+    --card-foreground: 248 250 252;
+
+    --popover: 222 84% 4%;
+    --popover-foreground: 248 250 252;
+
+    --primary: 270 91% 65%;
+    --primary-foreground: 248 250 252;
+
+    --secondary: 222 84% 5%;
+    --secondary-foreground: 248 250 252;
+
+    --muted: 222 84% 5%;
+    --muted-foreground: 203 23% 70%;
+
+    --accent: 270 91% 65%;
+    --accent-foreground: 248 250 252;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 248 250 252;
+
+    --border: 215 25% 15%;
+    --input: 215 25% 15%;
+    --ring: 270 91% 65%;
+
+    --radius: 0.75rem;
+
+    /* PalmAstro brand colors - Matching banner theme */
+    --cosmic: 270 91% 65%;
+    --cosmic-foreground: 248 250 252;
+
+    --mystic: 270 91% 65%;
+    --mystic-foreground: 248 250 252;
+
+    --golden: 45 90% 60%;
+    --golden-foreground: 248 250 252;
+
+    --stellar: 217 91% 70%;
+    --stellar-foreground: 248 250 252;
+
+    /* Sidebar */
+    --sidebar-background: 222 84% 4%;
+    --sidebar-foreground: 248 250 252;
+    --sidebar-primary: 270 91% 65%;
+    --sidebar-primary-foreground: 248 250 252;
+    --sidebar-accent: 222 84% 5%;
+    --sidebar-accent-foreground: 248 250 252;
+    --sidebar-border: 215 25% 15%;
+    --sidebar-ring: 270 91% 65%;
+  }
+
+  /* Dark theme - disabled to force light theme */
+  .dark {
+    /* Keep same light theme values */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 5%;
+    --border: 240 6% 90%;
+    --muted-foreground: 240 3% 46%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background:
+      /* Subtle star dots matching banner theme */
+      radial-gradient(
+        2px 2px at 20px 30px,
+        rgba(168, 85, 247, 0.4),
+        transparent
+      ),
+      radial-gradient(
+        1px 1px at 80px 70px,
+        rgba(251, 191, 36, 0.3),
+        transparent
+      ),
+      radial-gradient(
+        1.5px 1.5px at 150px 40px,
+        rgba(59, 130, 246, 0.25),
+        transparent
+      ),
+      radial-gradient(
+        1px 1px at 220px 120px,
+        rgba(168, 85, 247, 0.3),
+        transparent
+      ),
+      radial-gradient(
+        0.5px 0.5px at 300px 90px,
+        rgba(59, 130, 246, 0.2),
+        transparent
+      ),
+      radial-gradient(
+        2px 2px at 60px 200px,
+        rgba(251, 191, 36, 0.25),
+        transparent
+      ),
+      radial-gradient(
+        1px 1px at 180px 180px,
+        rgba(168, 85, 247, 0.2),
+        transparent
+      ),
+      radial-gradient(
+        1.5px 1.5px at 320px 60px,
+        rgba(59, 130, 246, 0.15),
+        transparent
+      ),
+      /* Base gradient matching banner: slate-900, purple-900, blue-900 */
+        linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e1b4b 20%,
+          #581c87 40%,
+          #1e3a8a 60%,
+          #1e1b4b 80%,
+          #0f172a 100%
+        );
+    background-size:
+      200px 150px,
+      250px 180px,
+      180px 120px,
+      220px 160px,
+      150px 100px,
+      280px 200px,
+      240px 170px,
+      320px 220px,
+      100% 100%;
+    background-repeat:
+      repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+
+    /* Mobile optimizations */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+  }
+
+  /* Mobile touch improvements */
+  @media (hover: none) and (pointer: coarse) {
+    body {
+      /* Use scroll background on mobile for better performance */
+      background-attachment: scroll;
+    }
+
+    /* Improve touch targets */
+    button,
+    [role="button"],
+    input,
+    textarea,
+    select {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Prevent zoom on input focus on iOS */
+  @media screen and (max-width: 768px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
+  }
+}
+
+@layer components {
+  .cosmic-bg {
+    background: linear-gradient(
+      135deg,
+      rgb(15, 23, 42) 0%,
+      rgb(88, 28, 135) 50%,
+      rgb(30, 58, 138) 100%
+    );
+  }
+
+  .stellar-glow {
+    box-shadow:
+      0 0 20px rgb(59, 130, 246, 0.6),
+      0 0 40px rgb(168, 85, 247, 0.4);
+  }
+
+  .golden-glow {
+    box-shadow:
+      0 0 20px rgb(251, 191, 36, 0.6),
+      0 0 40px rgb(245, 158, 11, 0.3);
+  }
+
+  .glass-card {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+  }
+
+  .cosmic-text {
+    background: linear-gradient(
+      135deg,
+      rgb(139, 92, 246),
+      rgb(59, 130, 246),
+      rgb(245, 158, 11)
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  .stars-bg::before,
+  .page-stars::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      /* Stars matching banner theme: purple-500, blue-600, golden */
+      radial-gradient(2px 2px at 15% 20%, rgba(168, 85, 247, 0.8), transparent),
+      radial-gradient(1px 1px at 80% 30%, rgba(251, 191, 36, 0.9), transparent),
+      radial-gradient(
+        1.5px 1.5px at 45% 60%,
+        rgba(59, 130, 246, 0.7),
+        transparent
+      ),
+      radial-gradient(1px 1px at 75% 80%, rgba(168, 85, 247, 0.6), transparent),
+      radial-gradient(2px 2px at 25% 90%, rgba(59, 130, 246, 0.6), transparent),
+      radial-gradient(1px 1px at 90% 15%, rgba(251, 191, 36, 0.7), transparent),
+      radial-gradient(
+        1.5px 1.5px at 35% 35%,
+        rgba(168, 85, 247, 0.5),
+        transparent
+      ),
+      radial-gradient(1px 1px at 65% 65%, rgba(59, 130, 246, 0.5), transparent),
+      radial-gradient(2px 2px at 85% 50%, rgba(251, 191, 36, 0.6), transparent);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    pointer-events: none;
+    animation: gentle-twinkle 6s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  /* Enhanced global star background for all pages */
+  .page-container::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      /* Dense star field covering entire screen */
+      radial-gradient(1px 1px at 5% 15%, rgba(168, 85, 247, 0.8), transparent),
+      radial-gradient(
+        0.5px 0.5px at 25% 25%,
+        rgba(251, 191, 36, 0.9),
+        transparent
+      ),
+      radial-gradient(
+        1.5px 1.5px at 45% 35%,
+        rgba(59, 130, 246, 0.7),
+        transparent
+      ),
+      radial-gradient(1px 1px at 65% 45%, rgba(168, 85, 247, 0.6), transparent),
+      radial-gradient(2px 2px at 85% 55%, rgba(251, 191, 36, 0.8), transparent),
+      radial-gradient(
+        0.5px 0.5px at 15% 65%,
+        rgba(59, 130, 246, 0.5),
+        transparent
+      ),
+      radial-gradient(1px 1px at 35% 75%, rgba(168, 85, 247, 0.7), transparent),
+      radial-gradient(
+        1.5px 1.5px at 55% 85%,
+        rgba(251, 191, 36, 0.6),
+        transparent
+      ),
+      radial-gradient(1px 1px at 75% 95%, rgba(59, 130, 246, 0.4), transparent),
+      radial-gradient(2px 2px at 95% 5%, rgba(168, 85, 247, 0.9), transparent);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    pointer-events: none;
+    animation: gentle-twinkle 8s ease-in-out infinite reverse;
+    z-index: 1;
+  }
+
+  /* Ensure all page containers have star background */
+  .page-container {
+    position: relative;
+    min-height: 100vh;
+  }
+
+  .cosmic-overlay {
+    background:
+      /* Overlay matching banner gradient */ linear-gradient(
+      45deg,
+      transparent 40%,
+      rgba(168, 85, 247, 0.1) 50%,
+      rgba(59, 130, 246, 0.08) 60%,
+      rgba(251, 191, 36, 0.06) 70%,
+      transparent 80%
+    );
+  }
+
+  /* Mobile-specific utilities */
+  .mobile-optimized {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Responsive text utilities */
+  .text-responsive {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+
+  .text-responsive-lg {
+    font-size: clamp(1.125rem, 3vw, 1.5rem);
+  }
+
+  .text-responsive-xl {
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+  }
+
+  /* Enhanced animations with cursor responsiveness */
+  @keyframes gentle-float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  @keyframes soft-glow {
+    0%,
+    100% {
+      opacity: 0.8;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes gentle-twinkle {
+    0%,
+    100% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    25% {
+      opacity: 0.7;
+      filter: brightness(0.8);
+    }
+    50% {
+      opacity: 1.2;
+      filter: brightness(1.3);
+    }
+    75% {
+      opacity: 0.9;
+      filter: brightness(0.9);
+    }
+  }
+
+  @keyframes cursor-attract {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    100% {
+      transform: translate(var(--cursor-x, 0), var(--cursor-y, 0)) scale(1.05);
+    }
+  }
+
+  /* Cursor-responsive elements */
+  .cursor-responsive {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .cursor-responsive:hover {
+    transform: scale(1.1);
+  }
+
+  /* Mobile-friendly animations */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-glow,
+    .animate-shimmer,
+    .animate-twinkle,
+    body {
+      animation: none;
+    }
+  }
+}
