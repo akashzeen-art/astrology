@@ -17,4 +17,5 @@ COPY . /app
 
 EXPOSE 8080
 
-CMD gunicorn palmastro_backend.wsgi:application --bind 0.0.0.0:${PORT:-8080}
+# Run migrations and start server
+CMD python manage.py migrate && gunicorn palmastro_backend.wsgi:application --bind 0.0.0.0:${PORT:-8080}
