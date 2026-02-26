@@ -27,48 +27,33 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  // Mock authentication - UI only, no backend authentication
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Check for existing authentication on app load
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-        const userData = localStorage.getItem(STORAGE_KEYS.USER_DATA);
-
-        if (token && userData) {
-          // Try to refresh user data from API
-          try {
-            const freshUserData = await apiService.getCurrentUser();
-            setUser(freshUserData);
-          } catch (error) {
-            // If API fails, use cached data
-            console.warn("Failed to refresh user data, using cached:", error);
-            setUser(JSON.parse(userData));
-          }
-        }
-      } catch (error) {
-        console.error("Auth check failed:", error);
-        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.USER_DATA);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuthStatus();
-  }, []);
+  // Mock user data for UI display
+  const mockUser: User = {
+    id: 1,
+    username: "demo_user",
+    email: "demo@palmastro.com",
+    first_name: "Demo",
+    last_name: "User",
+    avatar: "",
+    is_premium: false,
+    subscription_status: "free",
+    current_plan: "stellar_seeker",
+    date_joined: new Date().toISOString(),
+  };
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    // Mock login - just set user for UI display, no backend call
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const { user: userData } = await apiService.login(email, password);
-      setUser(userData);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setUser(mockUser);
       return true;
     } catch (error) {
-      console.error("Login failed:", error);
       return false;
     } finally {
       setIsLoading(false);
@@ -76,31 +61,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async (): Promise<void> => {
-    try {
-      await apiService.logout();
-      setUser(null);
-    } catch (error) {
-      console.error("Logout failed:", error);
-      // Clear local data even if API call fails
-      setUser(null);
-    }
+    // Mock logout - just clear user, no backend call
+    setUser(null);
   };
 
   const refreshUser = async (): Promise<void> => {
-    try {
-      if (user) {
-        const updatedUser = await apiService.getCurrentUser();
-        setUser(updatedUser);
-      }
-    } catch (error) {
-      console.error("User refresh failed:", error);
+    // Mock refresh - no backend call
+    if (user) {
+      setUser(mockUser);
     }
   };
 
   const value: AuthContextType = {
     user,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user, // Show authenticated when user is set
     login,
     logout,
     refreshUser,

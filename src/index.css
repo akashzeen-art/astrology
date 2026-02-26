@@ -82,75 +82,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    background:
-      /* Subtle star dots matching banner theme */
-      radial-gradient(
-        2px 2px at 20px 30px,
-        rgba(168, 85, 247, 0.4),
-        transparent
-      ),
-      radial-gradient(
-        1px 1px at 80px 70px,
-        rgba(251, 191, 36, 0.3),
-        transparent
-      ),
-      radial-gradient(
-        1.5px 1.5px at 150px 40px,
-        rgba(59, 130, 246, 0.25),
-        transparent
-      ),
-      radial-gradient(
-        1px 1px at 220px 120px,
-        rgba(168, 85, 247, 0.3),
-        transparent
-      ),
-      radial-gradient(
-        0.5px 0.5px at 300px 90px,
-        rgba(59, 130, 246, 0.2),
-        transparent
-      ),
-      radial-gradient(
-        2px 2px at 60px 200px,
-        rgba(251, 191, 36, 0.25),
-        transparent
-      ),
-      radial-gradient(
-        1px 1px at 180px 180px,
-        rgba(168, 85, 247, 0.2),
-        transparent
-      ),
-      radial-gradient(
-        1.5px 1.5px at 320px 60px,
-        rgba(59, 130, 246, 0.15),
-        transparent
-      ),
-      /* Base gradient matching banner: slate-900, purple-900, blue-900 */
-        linear-gradient(
-          135deg,
-          #0f172a 0%,
-          #1e1b4b 20%,
-          #581c87 40%,
-          #1e3a8a 60%,
-          #1e1b4b 80%,
-          #0f172a 100%
-        );
-    background-size:
-      200px 150px,
-      250px 180px,
-      180px 120px,
-      220px 160px,
-      150px 100px,
-      280px 200px,
-      240px 170px,
-      320px 220px,
-      100% 100%;
-    background-repeat:
-      repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, no-repeat;
-    background-attachment: fixed;
+    @apply bg-transparent text-foreground;
     min-height: 100vh;
-
-    /* Mobile optimizations */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -160,6 +93,28 @@
     scroll-behavior: smooth;
     /* Prevent horizontal scroll on mobile */
     overflow-x: hidden;
+  }
+
+  html, body, * {
+    cursor: url('/images/hand.png') 8 0, pointer;
+  }
+
+  /* Ensure all buttons and clickable elements always use the custom hand cursor, even on hover/focus/active */
+  button,
+  [role="button"],
+  .btn {
+    cursor: url('/images/hand.png') 8 0, pointer !important;
+  }
+  button:hover,
+  [role="button"]:hover,
+  .btn:hover,
+  button:focus,
+  [role="button"]:focus,
+  .btn:focus,
+  button:active,
+  [role="button"]:active,
+  .btn:active {
+    cursor: url('/images/hand.png') 8 0, pointer !important;
   }
 
   /* Mobile touch improvements */
@@ -213,9 +168,13 @@
   }
 
   .glass-card {
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.85); /* Slightly more opaque to reduce blur need */
+    backdrop-filter: blur(8px); /* Reduced from 12px for better performance */
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(168, 85, 247, 0.3);
+    /* Performance optimizations */
+    will-change: transform, opacity;
+    transform: translateZ(0); /* Force GPU acceleration */
   }
 
   .cosmic-text {
@@ -229,7 +188,8 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-size: 200% 200%;
-    animation: shimmer 3s ease-in-out infinite;
+    animation: shimmer 4s ease-in-out infinite; /* Slower animation = less CPU */
+    will-change: background-position;
   }
 
   .stars-bg::before,
@@ -417,6 +377,31 @@
     transform: scale(1.1);
   }
 
+  /* Performance optimizations */
+  * {
+    /* Optimize rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Reduce animations on low-end devices */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Optimize transitions - use transform and opacity only */
+  .transition-optimized {
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+    will-change: transform, opacity;
+  }
+
   /* Mobile-friendly animations */
   @media (prefers-reduced-motion: reduce) {
     .animate-float,
@@ -426,5 +411,55 @@
     body {
       animation: none;
     }
+  }
+
+  /* Disable animations on mobile for better performance */
+  @media (max-width: 768px) {
+    .floating-element,
+    .floating-icon {
+      animation: none !important;
+    }
+  }
+
+  /* Utility: hide scrollbars while preserving scroll */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Optimize background video for smooth scrolling */
+  video[data-playsinline] {
+    /* Force GPU acceleration */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
+    /* Optimize rendering */
+    contain: layout style paint;
+    /* Prevent repaints during scroll */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+    /* Smooth playback */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+
+  /* Fixed position video optimization */
+  video.fixed,
+  video[class*="fixed"] {
+    /* Isolate video layer for better compositing */
+    isolation: isolate;
+    /* Prevent layout shifts */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Additional GPU acceleration */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }

@@ -5,8 +5,10 @@ import type {
   AstrologyReading,
   Reading as BaseReading,
 } from "@/lib/apiService";
+import { STORAGE_KEYS } from "@/lib/config";
 
-type Reading = PalmReading | AstrologyReading;
+// Support all reading types including numerology
+type Reading = PalmReading | AstrologyReading | BaseReading;
 
 interface ReadingsContextType {
   readings: Reading[];
@@ -54,12 +56,12 @@ export const ReadingsProvider: React.FC<ReadingsProviderProps> = ({
     (id: string, updates: Partial<Reading>) => {
       setReadings((prev) =>
         prev.map((reading) =>
-          reading.id === id ? { ...reading, ...updates } : reading,
+          reading.id === id ? { ...reading, ...updates } as Reading : reading,
         ),
       );
 
       if (currentReading?.id === id) {
-        setCurrentReading((prev) => (prev ? { ...prev, ...updates } : null));
+        setCurrentReading((prev) => (prev ? { ...prev, ...updates } as Reading : null));
       }
     },
     [currentReading],
@@ -77,8 +79,11 @@ export const ReadingsProvider: React.FC<ReadingsProviderProps> = ({
 
   const loadReadings = useCallback(async () => {
     try {
-      const readingHistory = await apiService.getReadings(20);
-      setReadings(readingHistory);
+      const response = await apiService.getReadings(20);
+      // getReadings now returns { count, next, previous, results }
+      const readingHistory = response.results || [];
+      // Convert BaseReading[] to Reading[] (PalmReading | AstrologyReading | BaseReading)
+      setReadings(readingHistory as Reading[]);
     } catch (error) {
       console.error("Failed to load readings:", error);
     }
@@ -90,33 +95,75 @@ export const ReadingsProvider: React.FC<ReadingsProviderProps> = ({
       setProgress(0);
 
       try {
-        // Step 1: Upload image
+        // Use new direct analysis endpoint (matches specification)
         setProgress(20);
-        const { upload_id } = await apiService.uploadPalmImage(file);
-
-        // Step 2: Start analysis
-        setProgress(40);
 
         // Progress simulation while waiting for AI analysis
         const progressInterval = setInterval(() => {
           setProgress((prev) => {
-            const newProgress = Math.min(prev + 5, 90);
+            const newProgress = Math.min(prev + 10, 90);
             return newProgress;
           });
-        }, 500);
+        }, 300);
 
-        const reading = await apiService.analyzePalm(upload_id);
+        const analysisResult = await apiService.analyzePalmImage(file);
         clearInterval(progressInterval);
 
         setProgress(100);
+
+        // Transform result to PalmReading format
+        const reading: PalmReading = {
+          id: analysisResult.reading_id,
+          user: "",
+          type: "palm_analysis",
+          status: "completed",
+          accuracy: analysisResult.result?.overallScore || 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          results: analysisResult.result,
+        };
+
         addReading(reading);
         setCurrentReading(reading);
 
+        // Automatically save reading to Dashboard (only if user is authenticated)
+        if (reading.results) {
+          try {
+            const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+            if (token) {
+            await apiService.saveReading({
+              reading_type: "palm_analysis",
+              result: reading.results,
+              accuracy: reading.accuracy,
+              source_id: reading.id,
+              // Palm readings don't reference other palm readings
+            });
+            console.log("✅ Palm reading saved to Dashboard");
+            // Trigger Dashboard refresh event
+            window.dispatchEvent(new CustomEvent("reading-saved", { 
+              detail: { reading_type: "palm_analysis" } 
+            }));
+            } else {
+              console.log("ℹ️ User not logged in - reading available locally only");
+            }
+          } catch (error: any) {
+            // Only log if it's not an authentication error (which is expected for non-logged-in users)
+            if (error?.message?.includes("Not authenticated")) {
+              console.log("ℹ️ Please log in to save readings to your Dashboard");
+            } else {
+              console.warn("⚠️ Failed to save palm reading to Dashboard:", error);
+            }
+            // Don't throw - reading is still available locally
+          }
+        }
+
         return reading;
-      } catch (error) {
+      } catch (error: any) {
         console.error("Palm analysis failed:", error);
         setProgress(0);
-        throw error;
+        // Re-throw with user-friendly message
+        const errorMessage = error?.message || "Palm analysis failed. Please try again with a clear image.";
+        throw new Error(errorMessage);
       } finally {
         setIsAnalyzing(false);
       }
@@ -168,6 +215,36 @@ export const ReadingsProvider: React.FC<ReadingsProviderProps> = ({
         setProgress(100);
         addReading(reading);
         setCurrentReading(reading);
+
+        // Automatically save reading to Dashboard (only if user is authenticated)
+        if (reading.results) {
+          try {
+            const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+            if (token) {
+              await apiService.saveReading({
+                reading_type: "astrology_reading",
+                result: reading.results,
+                accuracy: reading.accuracy,
+                source_id: reading.id,
+              });
+              console.log("✅ Astrology reading saved to Dashboard");
+              // Trigger Dashboard refresh event
+              window.dispatchEvent(new CustomEvent("reading-saved", { 
+                detail: { reading_type: "astrology_reading" } 
+              }));
+            } else {
+              console.log("ℹ️ User not logged in - reading available locally only");
+            }
+          } catch (error: any) {
+            // Only log if it's not an authentication error (which is expected for non-logged-in users)
+            if (error?.message?.includes("Not authenticated")) {
+              console.log("ℹ️ Please log in to save readings to your Dashboard");
+            } else {
+              console.warn("⚠️ Failed to save astrology reading to Dashboard:", error);
+            }
+            // Don't throw - reading is still available locally
+          }
+        }
 
         return reading;
       } catch (error) {

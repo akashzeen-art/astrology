@@ -135,47 +135,18 @@ const CosmicScene = () => {
         <pointLight position={[-10, -10, -5]} intensity={0.8} color="#f59e0b" />
         <pointLight position={[10, -10, 5]} intensity={0.6} color="#3b82f6" />
 
-        {/* Floating orbs with better positioning */}
-        <FloatingOrb
-          position={[-6, 2, -3]}
-          color="#8b5cf6"
-          scale={0.8}
-          speed={0.8}
-        />
-        <FloatingOrb
-          position={[6, -1, -5]}
-          color="#3b82f6"
-          scale={1.2}
-          speed={1.2}
-        />
-        <FloatingOrb
-          position={[-3, -3, -2]}
-          color="#f59e0b"
-          scale={0.6}
-          speed={1.5}
-        />
-        <FloatingOrb
-          position={[4, 3, -7]}
-          color="#ec4899"
-          scale={0.9}
-          speed={0.7}
-        />
-        <FloatingOrb
-          position={[0, -4, -10]}
-          color="#06b6d4"
-          scale={1.1}
-          speed={1.0}
-        />
+        {/* Remove all FloatingOrb components */}
+        {/* Only keep the starfield and lighting for the 3D background */}
 
-        {/* Enhanced star field with cosmic colors */}
+        {/* Optimized star field - reduced count for better performance */}
         <Stars
-          radius={120}
-          depth={80}
-          count={isMobile ? 1200 : 2500}
-          factor={8}
-          saturation={0.9}
+          radius={100}
+          depth={60}
+          count={isMobile ? 800 : 1500} // Reduced from 1200/2500
+          factor={6} // Reduced from 8
+          saturation={0.8} // Reduced from 0.9
           fade
-          speed={0.2}
+          speed={0.15} // Reduced from 0.2
         />
 
         {/* Additional distant star layer */}
@@ -203,34 +174,118 @@ const CosmicScene = () => {
   );
 };
 
+// Animated Floating Images for Footer
+const AnimatedFooterImages = () => {
+  const [img1, setImg1] = useState({ x: 0, y: 0, scale: 1, rotate: 0, z: 1 });
+  const [img2, setImg2] = useState({ x: 0, y: 0, scale: 1, rotate: 0, z: 2 });
+  const requestRef = useRef<number>();
+  const startTime = useRef<number>(0);
+  useEffect(() => {
+    const animate = (time: number) => {
+      if (!startTime.current) startTime.current = time;
+      const t = (time - startTime.current) / 1000;
+      setImg1({
+        x: Math.sin(t * 0.5) * 120 + 80,
+        y: Math.cos(t * 0.7) * 60 + 120,
+        scale: 1 + 0.2 * Math.sin(t * 0.8),
+        rotate: (t * 40) % 360,
+        z: 1 + Math.round((Math.sin(t * 0.6) + 1) * 1),
+      });
+      setImg2({
+        x: Math.cos(t * 0.6) * 100 + 400,
+        y: Math.sin(t * 0.9) * 80 + 200,
+        scale: 1.1 + 0.15 * Math.cos(t * 0.5),
+        rotate: (t * 60) % 360,
+        z: 1 + Math.round((Math.cos(t * 0.8) + 1) * 1),
+      });
+      requestRef.current = requestAnimationFrame(animate);
+    };
+    requestRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
+  }, []);
+  return (
+    <>
+      <img
+        src="/images/animate1.png"
+        alt="Animated 1"
+        style={{
+          position: "absolute",
+          left: `${img1.x}px`,
+          top: `${img1.y}px`,
+          width: `${120 * img1.scale}px`,
+          height: `${120 * img1.scale}px`,
+          borderRadius: "50%",
+          backgroundColor: "transparent",
+          zIndex: 2,
+          transform: `rotate(${img1.rotate}deg)`,
+          transition: "box-shadow 0.3s",
+          pointerEvents: "none",
+        }}
+        draggable={false}
+      />
+      <img
+        src="/images/animate2.png"
+        alt="Animated 2"
+        style={{
+          position: "absolute",
+          left: `${img2.x}px`,
+          top: `${img2.y}px`,
+          width: `${100 * img2.scale}px`,
+          height: `${100 * img2.scale}px`,
+          borderRadius: "50%",
+          zIndex: 2,
+          transform: `rotate(${img2.rotate}deg)`,
+          transition: "box-shadow 0.3s",
+          pointerEvents: "none",
+        }}
+        draggable={false}
+      />
+    </>
+  );
+};
+
 const Index = () => {
   const indexRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Mouse movement tracking
-    const handleMouseMove = (event: MouseEvent) => {
+    // Import throttle utility
+    const throttle = (func: Function, limit: number) => {
+      let inThrottle: boolean;
+      return function (this: any, ...args: any[]) {
+        if (!inThrottle) {
+          func.apply(this, args);
+          inThrottle = true;
+          setTimeout(() => (inThrottle = false), limit);
+        }
+      };
+    };
+
+    // Mouse movement tracking - THROTTLED for performance
+    const handleMouseMove = throttle((event: MouseEvent) => {
       const { clientX, clientY } = event;
       const { innerWidth, innerHeight } = window;
 
       // Normalize mouse position to -1 to 1 range
       mousePosition.x = (clientX / innerWidth) * 2 - 1;
       mousePosition.y = -(clientY / innerHeight) * 2 + 1;
-    };
+    }, 100); // Throttle to 100ms (10fps for mouse tracking)
 
     // Add mouse move listener
     window.addEventListener("mousemove", handleMouseMove);
 
     const ctx = gsap.context(() => {
-      // Page load animations
+      // Page load animations - REDUCED DURATION
       gsap.fromTo(
         ".fade-in-section",
-        { opacity: 0, y: 30 },
+        { opacity: 0, y: 20 },
         {
           opacity: 1,
           y: 0,
-          duration: 1,
-          stagger: 0.3,
-          ease: "power3.out",
+          duration: 0.6, // Reduced from 1s
+          stagger: 0.15, // Reduced from 0.3s
+          ease: "power2.out", // Simpler easing
           scrollTrigger: {
             trigger: indexRef.current,
             start: "top 80%",
@@ -240,40 +295,17 @@ const Index = () => {
         },
       );
 
-      // Enhanced floating elements animation with cursor influence
+      // SIMPLIFIED floating elements animation - REMOVED cursor influence for performance
       gsap.to(".floating-element", {
-        y: "random(-15, 15)",
-        x: "random(-8, 8)",
-        rotation: "random(-10, 10)",
-        duration: "random(3, 6)",
+        y: "random(-10, 10)", // Reduced range
+        x: "random(-5, 5)", // Reduced range
+        rotation: "random(-5, 5)", // Reduced rotation
+        duration: "random(4, 8)", // Longer duration = less frequent updates
         ease: "sine.inOut",
         repeat: -1,
         yoyo: true,
-        stagger: 0.2,
+        stagger: 0.3, // Increased stagger to reduce simultaneous animations
       });
-
-      // Cursor-following animation for floating elements
-      const handleMouseMoveGSAP = (event: MouseEvent) => {
-        const { clientX, clientY } = event;
-        const { innerWidth, innerHeight } = window;
-
-        const xPercent = (clientX / innerWidth - 0.5) * 100;
-        const yPercent = (clientY / innerHeight - 0.5) * 100;
-
-        gsap.to(".floating-element", {
-          x: `+=${xPercent * 0.02}`,
-          y: `+=${yPercent * 0.02}`,
-          duration: 2,
-          ease: "power2.out",
-          stagger: 0.02,
-        });
-      };
-
-      window.addEventListener("mousemove", handleMouseMoveGSAP);
-
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMoveGSAP);
-      };
     }, indexRef);
 
     return () => {
@@ -283,74 +315,71 @@ const Index = () => {
   }, []);
 
   return (
-    <div ref={indexRef} className="min-h-screen relative">
+    <div ref={indexRef} className="min-h-screen relative overflow-x-hidden">
       {/* Clean 3D Background */}
       <CosmicScene />
 
-      {/* Subtle astrology accent overlay */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="stars-bg absolute inset-0 opacity-40"></div>
+      {/* Enhanced gradient overlay with multiple layers */}
+      <div className="fixed inset-0 pointer-events-none z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-purple-900/40 to-blue-900/50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-900/20 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/30 via-transparent to-transparent" />
+        {/* Additional depth layers */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(139,92,246,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,_rgba(59,130,246,0.15),transparent_50%)]" />
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 min-h-screen">
-        {/* Dark cosmic overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-purple-900/20 to-blue-900/30 pointer-events-none"></div>
-
+      <div className="relative z-20 min-h-screen">
         <div className="relative">
           <Navbar />
-
           <main className="fade-in-section">
             <Hero />
             <div className="fade-in-section">
               <Features />
             </div>
           </main>
-
           <StatusCheck />
-
-          {/* Enhanced Footer */}
-          <footer className="fade-in-section border-t border-purple-200/50 py-12 bg-white/60 backdrop-blur-md relative overflow-hidden">
-            {/* Floating background elements */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="floating-element absolute top-6 left-8 w-2 h-2 bg-purple-400/60 rounded-full"></div>
-              <div className="floating-element absolute top-12 right-12 w-3 h-3 bg-blue-400/50 rounded-full"></div>
-              <div className="floating-element absolute bottom-8 left-16 w-1.5 h-1.5 bg-amber-400/70 rounded-full"></div>
-              <div className="floating-element absolute bottom-6 right-10 w-2.5 h-2.5 bg-pink-400/55 rounded-full"></div>
-              <div className="floating-element absolute top-1/2 left-1/4 w-1 h-1 bg-indigo-400/40 rounded-full"></div>
-              <div className="floating-element absolute top-1/3 right-1/3 w-2 h-2 bg-cyan-400/45 rounded-full"></div>
-            </div>
-
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-              <div className="text-center">
-                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-amber-600 bg-clip-text text-transparent mb-4">
+          {/* Footer */}
+          <footer className="fade-in-section py-8 sm:py-12 relative border-t border-white/10">
+            <div className="container mx-auto px-3 sm:px-4 relative z-10">
+              <div className="text-center max-w-2xl mx-auto">
+                {/* Logo */}
+                <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                   PalmAstro
                 </h3>
-                <p className="text-gray-700 mb-6 max-w-md mx-auto text-sm sm:text-base">
-                  Unlock your destiny through the ancient wisdom of palmistry,
-                  numerology, and astrology, powered by modern AI technology.
+                
+                {/* Description */}
+                <p className="mb-4 sm:mb-6 text-xs sm:text-sm text-gray-400 leading-relaxed px-2">
+                  Unlock your destiny through ancient wisdom of palmistry, numerology, and astrology, powered by AI.
                 </p>
-                <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 text-sm text-gray-600">
-                  <a
-                    href="#"
-                    className="hover:text-purple-600 transition-colors touch-manipulation py-2 px-4 sm:p-0"
+                
+                {/* Links */}
+                <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mb-4 sm:mb-6 px-2">
+                  <a 
+                    href="#" 
+                    className="text-xs sm:text-sm text-gray-400 hover:text-purple-400 transition-colors duration-200 touch-manipulation"
                   >
                     Privacy Policy
                   </a>
-                  <a
-                    href="#"
-                    className="hover:text-purple-600 transition-colors touch-manipulation py-2 px-4 sm:p-0"
+                  <span className="text-gray-600 text-xs">•</span>
+                  <a 
+                    href="#" 
+                    className="text-xs sm:text-sm text-gray-400 hover:text-blue-400 transition-colors duration-200 touch-manipulation"
                   >
                     Terms of Service
                   </a>
-                  <a
-                    href="#"
-                    className="hover:text-purple-600 transition-colors touch-manipulation py-2 px-4 sm:p-0"
+                  <span className="text-gray-600 text-xs">•</span>
+                  <a 
+                    href="#" 
+                    className="text-xs sm:text-sm text-gray-400 hover:text-amber-400 transition-colors duration-200 touch-manipulation"
                   >
                     Contact Us
                   </a>
                 </div>
-                <div className="mt-6 text-xs text-gray-500">
+                
+                {/* Copyright */}
+                <div className="text-[10px] sm:text-xs text-gray-500">
                   © 2024 PalmAstro. All rights reserved.
                 </div>
               </div>

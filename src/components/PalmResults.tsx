@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,158 +30,82 @@ import {
   copyToClipboard,
   ReadingData,
 } from "@/lib/shareAndDownload";
+import { useReadings } from "@/contexts/ReadingsContext";
+import type { PalmAnalysisResult, PalmReading } from "@/lib/apiService";
 
-interface PalmResultsProps {
-  analysisData?: any;
-}
-
-const PalmResults = ({ analysisData }: PalmResultsProps) => {
+const PalmResults = () => {
   const { toast } = useToast();
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const { currentReading } = useReadings();
 
-  const [palmAnalysis] = useState({
-    overallScore: 94,
-    lines: {
+  const palmReading = currentReading as PalmReading | null;
+  const palmAnalysis = useMemo<PalmAnalysisResult | null>(() => {
+    if (!palmReading || !palmReading.results) return null;
+
+    // Normalise numeric fields that may come back as 0–1 from the API
+    const normalizePercent = (value: number | undefined): number =>
+      value && value <= 1 ? Math.round(value * 100) : Math.round(value || 0);
+
+    const result = palmReading.results;
+
+    const normalizedLines = {
       lifeLine: {
-        quality: "Strong",
-        score: 92,
-        meaning: "Excellent vitality and long life",
-        details:
-          "Your life line is deep and well-formed, indicating robust health and strong life force. You have natural resilience and recovery abilities.",
+        ...result.lines.lifeLine,
+        score: normalizePercent(result.lines.lifeLine.score),
       },
       heartLine: {
-        quality: "Curved",
-        score: 88,
-        meaning: "Emotional and expressive in love",
-        details:
-          "Your heart line curves upward, showing you're a romantic at heart. You express emotions openly and value deep connections.",
+        ...result.lines.heartLine,
+        score: normalizePercent(result.lines.heartLine.score),
       },
       headLine: {
-        quality: "Clear",
-        score: 96,
-        meaning: "Sharp intellect and analytical mind",
-        details:
-          "A clear, straight head line indicates logical thinking and excellent problem-solving abilities. You approach challenges methodically.",
+        ...result.lines.headLine,
+        score: normalizePercent(result.lines.headLine.score),
       },
       fateLine: {
-        quality: "Present",
-        score: 85,
-        meaning: "Strong sense of purpose and direction",
-        details:
-          "Your fate line suggests you have a clear life direction and will achieve your goals through determination and hard work.",
+        ...result.lines.fateLine,
+        score: normalizePercent(result.lines.fateLine.score),
       },
-    },
+    };
+
+    const normalizedTraits = result.personality.traits.map((trait) => ({
+      ...trait,
+      score: normalizePercent(trait.score),
+    }));
+
+    const normalizedPredictions = result.predictions.map((p) => ({
+      ...p,
+      confidence: normalizePercent(p.confidence),
+    }));
+
+    const normalizedCompatibility = result.compatibility.map((c) => ({
+      ...c,
+      match: normalizePercent(c.match),
+    }));
+
+    const normalizedAccuracy = {
+      lineDetection: normalizePercent(result.accuracy.lineDetection),
+      patternAnalysis: normalizePercent(result.accuracy.patternAnalysis),
+      interpretation: normalizePercent(result.accuracy.interpretation),
+      overall: normalizePercent(result.accuracy.overall),
+    };
+
+    return {
+      ...result,
+      lines: normalizedLines,
     personality: {
-      traits: [
-        {
-          name: "Leadership",
-          score: 93,
-          description: "Natural ability to guide and inspire others",
+        ...result.personality,
+        traits: normalizedTraits,
         },
-        {
-          name: "Creativity",
-          score: 87,
-          description: "Strong artistic and innovative tendencies",
-        },
-        {
-          name: "Intuition",
-          score: 91,
-          description: "Excellent instincts and gut feelings",
-        },
-        {
-          name: "Communication",
-          score: 84,
-          description: "Good at expressing ideas and connecting with people",
-        },
-        {
-          name: "Determination",
-          score: 96,
-          description: "Persistent and goal-oriented nature",
-        },
-      ],
-      dominantHand: "Right",
-      palmShape: "Square",
-      fingerLength: "Balanced",
-    },
-    predictions: [
-      {
-        area: "Career",
-        timeframe: "Next 6 months",
-        prediction:
-          "Significant professional advancement on the horizon. Your leadership qualities will be recognized.",
-        confidence: 89,
-        advice:
-          "Take on challenging projects and showcase your problem-solving skills.",
-      },
-      {
-        area: "Relationships",
-        timeframe: "Next 3 months",
-        prediction:
-          "A meaningful connection will enter your life. Existing relationships will deepen.",
-        confidence: 82,
-        advice:
-          "Be open to new social situations and express your emotions honestly.",
-      },
-      {
-        area: "Health",
-        timeframe: "Ongoing",
-        prediction:
-          "Overall excellent health with strong vitality. Minor stress-related concerns possible.",
-        confidence: 94,
-        advice:
-          "Maintain regular exercise and consider meditation for stress management.",
-      },
-      {
-        area: "Finances",
-        timeframe: "Next year",
-        prediction:
-          "Financial growth through career advancement. Investment opportunities will arise.",
-        confidence: 78,
-        advice:
-          "Focus on long-term planning and avoid impulsive financial decisions.",
-      },
-    ],
-    specialMarks: [
-      {
-        name: "Star on Mount of Apollo",
-        meaning: "Creative success and recognition",
-        significance: "High",
-      },
-      {
-        name: "Triangle on Mount of Jupiter",
-        meaning: "Leadership abilities and wisdom",
-        significance: "Medium",
-      },
-      {
-        name: "Cross on Mount of Mercury",
-        meaning: "Communication challenges to overcome",
-        significance: "Low",
-      },
-    ],
-    compatibility: [
-      {
-        type: "Earth Hands",
-        match: 94,
-        description: "Practical and grounded individuals",
-      },
-      {
-        type: "Fire Hands",
-        match: 87,
-        description: "Energetic and passionate personalities",
-      },
-      {
-        type: "Water Hands",
-        match: 76,
-        description: "Emotional and intuitive types",
-      },
-      {
-        type: "Air Hands",
-        match: 82,
-        description: "Intellectual and communicative people",
-      },
-    ],
-  });
+      predictions: normalizedPredictions,
+      compatibility: normalizedCompatibility,
+      accuracy: normalizedAccuracy,
+      overallScore:
+        result.overallScore && result.overallScore <= 1
+          ? Math.round(result.overallScore * 100)
+          : Math.round(result.overallScore || 0),
+    };
+  }, [palmReading]);
 
   const getLineColor = (quality: string) => {
     switch (quality.toLowerCase()) {
@@ -200,28 +124,15 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
   const getReadingData = (): ReadingData => ({
     type: "palm",
     userInfo: {
-      name: analysisData?.name || "Palm Reading User",
-      date: analysisData?.date || new Date().toLocaleDateString(),
-      email: analysisData?.email,
+      name: "Palm Reading User",
+      date: new Date().toLocaleDateString(),
+      email: undefined,
     },
-    results: {
-      lines: palmAnalysis.lines,
-      personality_traits: palmAnalysis.personality.traits.map((t) => t.name),
-      life_predictions: {
-        career: palmAnalysis.predictions.find((p) => p.area === "Career")
-          ?.prediction,
-        relationships: palmAnalysis.predictions.find(
-          (p) => p.area === "Relationships",
-        )?.prediction,
-        health: palmAnalysis.predictions.find((p) => p.area === "Health")
-          ?.prediction,
-        finances: palmAnalysis.predictions.find((p) => p.area === "Finances")
-          ?.prediction,
-      },
-      special_marks: palmAnalysis.specialMarks,
-      compatibility: palmAnalysis.compatibility,
-    },
-    overallScore: palmAnalysis.overallScore,
+    // Pass the full palm analysis result so the PDF can include
+    // all sections: lines, personality, predictions, special marks,
+    // compatibility, accuracy, and summary.
+    results: palmAnalysis,
+    overallScore: palmAnalysis?.overallScore ?? 0,
     timestamp: new Date().toISOString(),
   });
 
@@ -329,42 +240,115 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
     }
   };
 
+  if (!palmAnalysis) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <Card className="glass-card">
+          <CardContent className="p-8 text-center text-muted-foreground">
+            <p>
+              No palm reading is available yet. Please upload a palm image and run
+              an analysis first.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Overall Score */}
-      <Card className="glass-card stellar-glow">
-        <CardContent className="p-6 text-center">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <Hand className="h-12 w-12 text-cosmic animate-glow" />
-            <div>
-              <h2 className="text-3xl font-bold cosmic-text">
+    <div className="max-w-6xl mx-auto px-4 pb-16 pt-10 space-y-8">
+      {/* Overall Score – circular glowing indicator */}
+      <Card className="glass-card stellar-glow overflow-hidden">
+        <CardContent className="px-6 py-8 flex flex-col items-center justify-center">
+          <div className="relative mb-6">
+            <div className="h-40 w-40 sm:h-48 sm:w-48 rounded-full bg-gradient-to-tr from-purple-500 via-fuchsia-400 to-sky-400 p-[3px] shadow-[0_0_35px_rgba(168,85,247,0.8)] animate-pulse-slow">
+              <div className="h-full w-full rounded-full bg-slate-950/80 flex items-center justify-center">
+                <div className="text-center space-y-1">
+                  <div className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
                 {palmAnalysis.overallScore}%
-              </h2>
-              <p className="text-muted-foreground">
-                Overall Palm Reading Score
-              </p>
+                  </div>
+                  <div className="text-xs uppercase tracking-[0.2em] text-purple-200/80">
+                    Overall Score
+                  </div>
+                </div>
             </div>
           </div>
-          <Badge className="bg-stellar-gradient stellar-glow px-4 py-2">
-            <CheckCircle className="h-4 w-4 mr-2" />
+            <div className="pointer-events-none absolute inset-0 blur-3xl bg-purple-500/20" />
+          </div>
+
+          <Badge className="bg-stellar-gradient stellar-glow px-4 py-2 flex items-center gap-2 text-xs sm:text-sm">
+            <CheckCircle className="h-4 w-4" />
             Analysis Complete
           </Badge>
+
+          <p className="mt-4 max-w-xl text-center text-sm sm:text-base text-muted-foreground">
+            {palmAnalysis.summary || 
+              `Your palm has been analyzed using advanced AI vision. The overall score of ${palmAnalysis.overallScore}% is calculated from 
+              line quality, personality traits, mount development, and special markings, providing a comprehensive assessment of your palm characteristics.`}
+          </p>
         </CardContent>
       </Card>
 
       {/* Detailed Analysis Tabs */}
       <Tabs defaultValue="lines" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 glass-card">
-          <TabsTrigger value="lines">Palm Lines</TabsTrigger>
-          <TabsTrigger value="personality">Personality</TabsTrigger>
-          <TabsTrigger value="predictions">Predictions</TabsTrigger>
-          <TabsTrigger value="special">Special Marks</TabsTrigger>
+        <TabsList className="glass-card w-full flex md:grid md:grid-cols-4 overflow-x-auto no-scrollbar gap-1 p-1">
+          <TabsTrigger
+            value="lines"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-[0_0_18px_rgba(167,139,250,0.7)] transition-all duration-300 rounded-full px-4 py-2 text-xs sm:text-sm"
+          >
+            Palm Lines
+          </TabsTrigger>
+          <TabsTrigger
+            value="personality"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-[0_0_18px_rgba(167,139,250,0.7)] transition-all duration-300 rounded-full px-4 py-2 text-xs sm:text-sm"
+          >
+            Personality
+          </TabsTrigger>
+          <TabsTrigger
+            value="predictions"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-[0_0_18px_rgba(167,139,250,0.7)] transition-all duration-300 rounded-full px-4 py-2 text-xs sm:text-sm"
+          >
+            Predictions
+          </TabsTrigger>
+          <TabsTrigger
+            value="special"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-[0_0_18px_rgba(167,139,250,0.7)] transition-all duration-300 rounded-full px-4 py-2 text-xs sm:text-sm"
+          >
+            Special Marks
+          </TabsTrigger>
         </TabsList>
 
         {/* Palm Lines Tab */}
         <TabsContent value="lines" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.entries(palmAnalysis.lines).map(([lineKey, line]) => (
+            {Object.entries(palmAnalysis.lines)
+              .filter(([, line]) => {
+                const quality = line.quality?.toLowerCase?.() ?? "";
+                const details = (line.details || "").toLowerCase();
+                const meaning = (line.meaning || "").toLowerCase();
+
+                // 1) If the line is explicitly marked as absent with a 0 score and a
+                //    "not visible" style details message, hide it from the UI.
+                if (quality === "absent") return false;
+                if (line.score === 0 && details.includes("not visible")) return false;
+
+                // 2) Generic safeguard: if score is 0 AND there is no meaningful
+                //    interpretation AND all metrics look like N/A / 0%, treat it as
+                //    "no usable information" and hide this line.
+                const hasMeaning = meaning.trim().length > 0;
+                const metricsAllNA =
+                  details.includes("clarity=n/a") &&
+                  details.includes("depth=n/a") &&
+                  (details.includes("calculated score=0%") ||
+                    details.includes("calculated score=0 %"));
+
+                if (line.score === 0 && !hasMeaning && metricsAllNA) {
+                  return false;
+                }
+
+                return true;
+              })
+              .map(([lineKey, line]) => (
               <Card
                 key={lineKey}
                 className="glass-card hover:stellar-glow transition-all duration-300"
@@ -390,7 +374,10 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
                       </span>
                       <span className="font-medium">{line.score}%</span>
                     </div>
-                    <Progress value={line.score} className="h-2" />
+                    <Progress
+                      value={line.score}
+                      className="h-2 rounded-full bg-slate-900/60 overflow-hidden transition-all duration-700 ease-out"
+                    />
                   </div>
                   <div>
                     <p className="font-medium text-cosmic mb-2">
@@ -425,7 +412,10 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
                         {trait.score}%
                       </span>
                     </div>
-                    <Progress value={trait.score} className="h-2" />
+                    <Progress
+                      value={trait.score}
+                      className="h-2 rounded-full bg-slate-900/60 overflow-hidden transition-all duration-700 ease-out"
+                    />
                     <p className="text-xs text-muted-foreground">
                       {trait.description}
                     </p>
@@ -465,6 +455,12 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
                       {palmAnalysis.personality.fingerLength}
                     </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Hand Type:</span>
+                    <span className="font-medium">
+                      {palmAnalysis.personality.handType}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="mt-6 p-4 bg-cosmic/10 rounded-lg">
@@ -472,9 +468,7 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
                     Hand Type Analysis
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    Your square palm with balanced fingers indicates a
-                    practical, reliable personality with good organizational
-                    skills. You balance logic with intuition effectively.
+                    {palmAnalysis.personality.handTypeAnalysis || palmAnalysis.summary || "Analysis of your hand type characteristics and overall palm reading insights."}
                   </p>
                 </div>
               </CardContent>
@@ -490,30 +484,36 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {palmAnalysis.compatibility.map((compat, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border/50"
-                  >
-                    <div>
-                      <p className="font-medium">{compat.type}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {compat.description}
-                      </p>
+              {palmAnalysis.compatibility && palmAnalysis.compatibility.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {palmAnalysis.compatibility.map((compat, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:border-cosmic/50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium text-base">{compat.type}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {compat.description}
+                        </p>
+                      </div>
+                      <div className="text-right ml-4">
+                        <p className="text-lg font-bold cosmic-text">
+                          {compat.match}%
+                        </p>
+                        <Progress
+                          value={compat.match}
+                          className="h-1 w-16 mt-1 rounded-full bg-slate-900/60 overflow-hidden transition-all duration-700 ease-out"
+                        />
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold cosmic-text">
-                        {compat.match}%
-                      </p>
-                      <Progress
-                        value={compat.match}
-                        className="h-1 w-16 mt-1"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-4">
+                  Compatibility analysis will be available after your palm reading is complete.
+                </p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -576,7 +576,10 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
                           {prediction.confidence}%
                         </span>
                       </div>
-                      <Progress value={prediction.confidence} className="h-2" />
+                      <Progress
+                        value={prediction.confidence}
+                        className="h-2 rounded-full bg-slate-900/60 overflow-hidden transition-all duration-700 ease-out"
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -595,47 +598,62 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {palmAnalysis.specialMarks.map((mark, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 rounded-lg border border-border/50"
-                  >
-                    <div>
-                      <p className="font-medium">{mark.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {mark.meaning}
-                      </p>
-                    </div>
-                    <Badge
-                      variant={
-                        mark.significance === "High" ? "default" : "outline"
-                      }
-                      className={
-                        mark.significance === "High"
-                          ? "bg-cosmic/20 text-cosmic border-cosmic/30"
-                          : mark.significance === "Medium"
-                            ? "border-stellar/50 text-stellar bg-stellar/10"
-                            : "border-golden/50 text-golden bg-golden/10"
-                      }
+              {palmAnalysis.specialMarks && palmAnalysis.specialMarks.length > 0 ? (
+                <div className="space-y-4">
+                  {palmAnalysis.specialMarks.map((mark, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-cosmic/50 transition-colors"
                     >
-                      {mark.significance} Impact
-                    </Badge>
-                  </div>
-                ))}
-              </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-base">{mark.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {mark.location || "On palm"}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {mark.meaning}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          mark.significance === "High" ? "default" : "outline"
+                        }
+                        className={
+                          mark.significance === "High"
+                            ? "bg-cosmic/20 text-cosmic border-cosmic/30 ml-4"
+                            : mark.significance === "Medium"
+                              ? "border-stellar/50 text-stellar bg-stellar/10 ml-4"
+                              : "border-golden/50 text-golden bg-golden/10 ml-4"
+                        }
+                      >
+                        {mark.significance} Impact
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">
+                    No special marks detected on this palm. This indicates a clear, unmarked palm with straightforward life patterns.
+                  </p>
+                </div>
+              )}
 
+              {palmAnalysis.specialMarks.length > 0 && (
               <div className="mt-6 p-4 bg-stellar/10 rounded-lg">
                 <h4 className="font-medium text-stellar mb-2">
                   Symbol Interpretation
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  The special marks on your palm are rare and significant. The
-                  star on your Mount of Apollo is particularly auspicious,
-                  indicating potential for creative success and public
-                  recognition.
+                    {palmAnalysis.specialMarks
+                      .map(
+                        (m) =>
+                          `${m.name} (${m.location}) – ${m.significance} impact.`
+                      )
+                      .join(" ")}
                 </p>
               </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -643,12 +661,13 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
 
       {/* Action Buttons */}
       <div className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="overflow-x-auto no-scrollbar pb-1">
+          <div className="flex gap-3 min-w-max sm:min-w-0 sm:grid sm:grid-cols-2 lg:grid-cols-4">
           {/* Download PDF Report */}
           <Button
             onClick={handleDownload}
             disabled={isDownloading}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg"
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-[0_0_18px_rgba(129,140,248,0.6)] hover:shadow-[0_0_26px_rgba(129,140,248,0.9)] rounded-xl px-5"
           >
             {isDownloading ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -663,7 +682,7 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
             onClick={handleShare}
             disabled={isSharing}
             variant="outline"
-            className="border-purple-300 text-purple-700 hover:bg-purple-50"
+            className="border-purple-300/70 text-purple-200 hover:bg-purple-500/10 rounded-xl shadow-[0_0_12px_rgba(167,139,250,0.35)] hover:shadow-[0_0_20px_rgba(167,139,250,0.6)]"
           >
             {isSharing ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -678,7 +697,7 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
             onClick={handleShareWithReport}
             disabled={isSharing}
             variant="outline"
-            className="border-blue-300 text-blue-700 hover:bg-blue-50"
+            className="border-blue-300/70 text-blue-200 hover:bg-blue-500/10 rounded-xl shadow-[0_0_12px_rgba(59,130,246,0.35)] hover:shadow-[0_0_20px_rgba(59,130,246,0.6)]"
           >
             {isSharing ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -692,11 +711,12 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
           <Button
             onClick={handleCopyToClipboard}
             variant="outline"
-            className="border-gray-300 text-gray-700 hover:bg-gray-50"
+            className="border-gray-400/60 text-gray-100 hover:bg-gray-500/10 rounded-xl shadow-[0_0_12px_rgba(148,163,184,0.25)] hover:shadow-[0_0_18px_rgba(148,163,184,0.45)]"
           >
             <Copy className="h-4 w-4 mr-2" />
             Copy Summary
           </Button>
+          </div>
         </div>
 
         {/* Save to Dashboard */}
@@ -704,7 +724,7 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
           <Link to="/dashboard">
             <Button
               variant="outline"
-              className="border-purple-300 text-purple-700 hover:bg-purple-50 px-8"
+              className="border-purple-300/80 text-purple-200 hover:bg-purple-500/10 px-8 rounded-xl shadow-[0_0_14px_rgba(167,139,250,0.4)] hover:shadow-[0_0_22px_rgba(167,139,250,0.7)]"
             >
               <Eye className="h-4 w-4 mr-2" />
               Save to Dashboard
@@ -712,13 +732,19 @@ const PalmResults = ({ analysisData }: PalmResultsProps) => {
           </Link>
         </div>
 
-        {/* Instructions */}
-        <div className="text-center">
-          <p className="text-sm text-gray-600 max-w-md mx-auto">
-            <strong>Download PDF:</strong> Get a detailed report •{" "}
-            <strong>Share:</strong> Share on social media •{" "}
-            <strong>Share Report:</strong> Include PDF file •{" "}
-            <strong>Copy:</strong> Copy text summary
+        {/* Button tooltips / helper text */}
+        <div className="text-center text-xs sm:text-sm text-gray-300 max-w-xl mx-auto space-y-1">
+          <p>
+            <strong>Download PDF:</strong> Get a detailed palm reading report.
+          </p>
+          <p>
+            <strong>Share:</strong> Share your results on social media or chat.
+          </p>
+          <p>
+            <strong>Share Report:</strong> Include the full PDF file when supported.
+          </p>
+          <p>
+            <strong>Copy Summary:</strong> Copy a concise text summary of your reading.
           </p>
         </div>
       </div>

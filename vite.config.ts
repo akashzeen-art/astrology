@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -11,15 +10,10 @@ export default defineConfig({
     },
   },
   define: {
-    // Suppress console warnings for recharts defaultProps in development
-    "process.env.NODE_ENV": JSON.stringify(
-      process.env.NODE_ENV || "development",
-    ),
-    // Define global for compatibility
+    "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || "development"),
     global: "globalThis",
   },
   esbuild: {
-    // Drop console warnings in production
     drop: process.env.NODE_ENV === "production" ? ["console", "debugger"] : [],
   },
   server: {
@@ -27,10 +21,13 @@ export default defineConfig({
     port: 3000,
     strictPort: false,
     hmr: {
-      overlay: false, // Disable error overlay completely
+      overlay: false,
     },
     fs: {
-      strict: false, // Disable strict file system checks
+      strict: false,
+    },
+    watch: {
+      usePolling: true, // Ensures file changes are picked up correctly on Windows
     },
   },
   build: {
@@ -54,8 +51,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ["gsap", "gsap/ScrollTrigger"],
-    exclude: [],
   },
-  logLevel: "warn", // Reduce log noise
-  clearScreen: false, // Don't clear console
+  logLevel: "info", // Show all normal logs (fixes your issue)
+  clearScreen: false, // Do not clear terminal on restart
 });

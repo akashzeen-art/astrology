@@ -16,7 +16,8 @@ export const APP_CONFIG = {
 
 // Feature Flags
 export const FEATURES = {
-  MOCK_API: import.meta.env.VITE_USE_MOCK_API !== "false", // Default to true unless explicitly disabled
+  // Use real backend by default. Only enable mock API when explicitly set to "true".
+  MOCK_API: import.meta.env.VITE_USE_MOCK_API === "true",
   ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === "true",
   PAYMENTS: import.meta.env.VITE_ENABLE_PAYMENTS === "true",
 } as const;
@@ -33,11 +34,11 @@ export const STORAGE_KEYS = {
 export const API_ENDPOINTS = {
   // Auth
   AUTH: {
+    SIGNUP: "/auth/signup/",
     LOGIN: "/auth/login/",
-    REGISTER: "/auth/register/",
     LOGOUT: "/auth/logout/",
-    REFRESH: "/auth/token/refresh/",
-    PROFILE: "/auth/profile/",
+    REFRESH: "/auth/refresh/",
+    ME: "/auth/me/", // User profile endpoint
     CHANGE_PASSWORD: "/auth/password/change/",
     RESET_PASSWORD: "/auth/password/reset/",
     DASHBOARD: "/auth/dashboard/",
@@ -45,12 +46,29 @@ export const API_ENDPOINTS = {
 
   // Readings
   READINGS: {
-    LIST: "/readings/",
-    CREATE: "/readings/",
+    LIST: "/readings/list/", // GET - List all readings
+    CREATE: "/readings/", // POST - Create new reading
     DETAIL: (id: string) => `/readings/${id}/`,
     PALM_UPLOAD: "/readings/palm/upload/",
     PALM_ANALYZE: "/readings/palm/analyze/",
+    PALM_ANALYZE_NEW: "/palm-reading/analyze/", // New endpoint matching specification
     ASTROLOGY_CREATE: "/readings/astrology/",
+    SAVE_UNIFIED: "/readings/save/", // Unified endpoint to save all reading types
+  },
+  
+  // Predictions
+  PREDICTIONS: {
+    GET: "/predictions/get/", // GET - Get all predictions from readings
+  },
+  
+  // Dashboard
+  DASHBOARD: {
+    REALTIME: "/auth/dashboard/realtime/", // GET - Real-time dashboard updates
+  },
+  
+  // Plans
+  PLANS: {
+    UPGRADE: "/auth/upgrade-plan/", // POST - Upgrade membership plan
   },
 
   // Astrology

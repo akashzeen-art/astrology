@@ -185,6 +185,11 @@ const addPalmAnalysisContent = async (
     return yPosition;
   };
 
+  // Guard against missing results
+  if (!results) {
+    return yPosition;
+  }
+
   // Palm Lines Analysis
   yPosition = addNewPageIfNeeded(60);
 
@@ -195,73 +200,234 @@ const addPalmAnalysisContent = async (
 
   if (results.lines) {
     Object.entries(results.lines).forEach(([lineKey, line]: [string, any]) => {
-      yPosition = addNewPageIfNeeded(25);
+      yPosition = addNewPageIfNeeded(30);
+
+      const prettyName =
+        lineKey === "lifeLine"
+          ? "Life Line"
+          : lineKey === "heartLine"
+            ? "Heart Line"
+            : lineKey === "headLine"
+              ? "Head Line"
+              : lineKey === "fateLine"
+                ? "Fate Line"
+                : `${lineKey} Line`;
 
       pdf.setFontSize(12);
       pdf.setFont("helvetica", "bold");
-      pdf.text(
-        `${lineKey.charAt(0).toUpperCase() + lineKey.slice(1)} Line`,
-        15,
-        yPosition,
-      );
+      pdf.text(prettyName, 15, yPosition);
 
       yPosition += 8;
       pdf.setFont("helvetica", "normal");
-      pdf.text(`Quality: ${line.quality} (${line.score}%)`, 20, yPosition);
+      pdf.text(`Quality: ${line.quality}`, 20, yPosition);
+
+      yPosition += 6;
+      pdf.text(`Score: ${line.score}%`, 20, yPosition);
 
       yPosition += 6;
       const splitMeaning = pdf.splitTextToSize(line.meaning, pageWidth - 30);
       pdf.text(splitMeaning, 20, yPosition);
-      yPosition += splitMeaning.length * 4 + 5;
+      yPosition += splitMeaning.length * 4 + 3;
+
+      if (line.details) {
+        const splitDetails = pdf.splitTextToSize(
+          `Details: ${line.details}`,
+          pageWidth - 30,
+        );
+        pdf.text(splitDetails, 20, yPosition);
+        yPosition += splitDetails.length * 4 + 5;
+      }
     });
   }
 
-  // Personality Traits
-  if (results.personality_traits) {
-    yPosition = addNewPageIfNeeded(40);
+  // Personality Traits & Physical Characteristics
+  if (results.personality) {
+    yPosition = addNewPageIfNeeded(50);
 
     pdf.setFontSize(16);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Personality Traits", 15, yPosition);
-    yPosition += 15;
+    pdf.text("Personality & Hand Profile", 15, yPosition);
+    yPosition += 12;
 
-    results.personality_traits.forEach((trait: string) => {
-      yPosition = addNewPageIfNeeded(8);
-      pdf.setFontSize(11);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(`• ${trait}`, 20, yPosition);
+    // Physical characteristics
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Physical Characteristics", 15, yPosition);
+    yPosition += 8;
+
+    pdf.setFont("helvetica", "normal");
+    const physLines = [
+      `Dominant Hand: ${results.personality.dominantHand}`,
+      `Palm Shape: ${results.personality.palmShape}`,
+      `Finger Length: ${results.personality.fingerLength}`,
+      `Hand Type: ${results.personality.handType}`,
+    ];
+    physLines.forEach((text) => {
+      pdf.text(text, 20, yPosition);
       yPosition += 6;
     });
+
+    // Personality traits with scores
+    if (results.personality.traits?.length) {
+      yPosition = addNewPageIfNeeded(20);
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Personality Traits", 15, yPosition);
+      yPosition += 8;
+
+      pdf.setFont("helvetica", "normal");
+      results.personality.traits.forEach((trait: any) => {
+        yPosition = addNewPageIfNeeded(16);
+        pdf.text(
+          `• ${trait.name} (${trait.score}%)`,
+          20,
+          yPosition,
+        );
+        yPosition += 6;
+        const splitDesc = pdf.splitTextToSize(
+          trait.description,
+          pageWidth - 30,
+        );
+        pdf.text(splitDesc, 24, yPosition);
+        yPosition += splitDesc.length * 4 + 3;
+      });
+    }
   }
 
-  // Life Predictions
-  if (results.life_predictions) {
+  // Predictions
+  if (results.predictions?.length) {
     yPosition = addNewPageIfNeeded(40);
 
     pdf.setFontSize(16);
     pdf.setFont("helvetica", "bold");
     pdf.text("Life Predictions", 15, yPosition);
-    yPosition += 15;
+    yPosition += 12;
 
-    Object.entries(results.life_predictions).forEach(
-      ([area, prediction]: [string, any]) => {
-        yPosition = addNewPageIfNeeded(15);
+    results.predictions.forEach((prediction: any) => {
+      yPosition = addNewPageIfNeeded(30);
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(
+        `${prediction.area} (${prediction.timeframe})`,
+        15,
+        yPosition,
+      );
+      yPosition += 8;
 
-        pdf.setFontSize(12);
-        pdf.setFont("helvetica", "bold");
-        pdf.text(
-          `${area.charAt(0).toUpperCase() + area.slice(1)}:`,
-          20,
-          yPosition,
-        );
+      pdf.setFont("helvetica", "normal");
+      const predText = pdf.splitTextToSize(
+        `Prediction: ${prediction.prediction}`,
+        pageWidth - 30,
+      );
+      pdf.text(predText, 20, yPosition);
+      yPosition += predText.length * 4 + 3;
 
-        yPosition += 8;
-        pdf.setFont("helvetica", "normal");
-        const splitPrediction = pdf.splitTextToSize(prediction, pageWidth - 30);
-        pdf.text(splitPrediction, 20, yPosition);
-        yPosition += splitPrediction.length * 4 + 5;
-      },
+      const adviceText = pdf.splitTextToSize(
+        `Advice: ${prediction.advice}`,
+        pageWidth - 30,
+      );
+      pdf.text(adviceText, 20, yPosition);
+      yPosition += adviceText.length * 4 + 3;
+
+      pdf.text(`Confidence: ${prediction.confidence}%`, 20, yPosition);
+      yPosition += 8;
+    });
+  }
+
+  // Special Marks
+  if (results.specialMarks?.length) {
+    yPosition = addNewPageIfNeeded(30);
+
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Special Marks & Symbols", 15, yPosition);
+    yPosition += 12;
+
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "normal");
+    results.specialMarks.forEach((mark: any) => {
+      yPosition = addNewPageIfNeeded(18);
+      pdf.text(`• ${mark.name}`, 20, yPosition);
+      yPosition += 6;
+      const loc = mark.location ? `Location: ${mark.location}` : "";
+      if (loc) {
+        pdf.text(loc, 24, yPosition);
+        yPosition += 6;
+      }
+      const meaning = pdf.splitTextToSize(
+        `Meaning: ${mark.meaning}`,
+        pageWidth - 30,
+      );
+      pdf.text(meaning, 24, yPosition);
+      yPosition += meaning.length * 4 + 3;
+      pdf.text(`Significance: ${mark.significance}`, 24, yPosition);
+      yPosition += 6;
+    });
+  }
+
+  // Compatibility
+  if (results.compatibility?.length) {
+    yPosition = addNewPageIfNeeded(30);
+
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Compatibility with Other Hand Types", 15, yPosition);
+    yPosition += 12;
+
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "normal");
+    results.compatibility.forEach((compat: any) => {
+      yPosition = addNewPageIfNeeded(14);
+      pdf.text(
+        `• ${compat.type}: ${compat.match}% - ${compat.description}`,
+        20,
+        yPosition,
+      );
+      yPosition += 8;
+    });
+  }
+
+  // Accuracy & Summary
+  if (results.accuracy) {
+    yPosition = addNewPageIfNeeded(30);
+
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Analysis Confidence", 15, yPosition);
+    yPosition += 12;
+
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "normal");
+    const metrics = [
+      ["Line Detection", results.accuracy.lineDetection],
+      ["Pattern Analysis", results.accuracy.patternAnalysis],
+      ["Interpretation", results.accuracy.interpretation],
+      ["Overall", results.accuracy.overall],
+    ];
+    metrics.forEach(([label, value]) => {
+      if (typeof value === "number") {
+        pdf.text(`${label}: ${value}%`, 20, yPosition);
+        yPosition += 6;
+      }
+    });
+  }
+
+  if (results.summary) {
+    yPosition = addNewPageIfNeeded(40);
+
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Summary", 15, yPosition);
+    yPosition += 12;
+
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "normal");
+    const summaryText = pdf.splitTextToSize(
+      results.summary,
+      pageWidth - 30,
     );
+    pdf.text(summaryText, 20, yPosition);
+    yPosition += summaryText.length * 4 + 5;
   }
 
   return yPosition;

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { STORAGE_KEYS } from "@/lib/config";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -185,6 +186,7 @@ const ThreeBackground = () => {
 
 const Numerology = () => {
   const { toast } = useToast();
+  // Authentication removed
   const [birthDate, setBirthDate] = useState("");
   const [fullName, setFullName] = useState("");
   const [result, setResult] = useState<any>(null);
@@ -199,6 +201,10 @@ const Numerology = () => {
   const visualsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!pageRef.current || !headerRef.current || !formRef.current || !visualsRef.current) {
+      return;
+    }
+
     const ctx = gsap.context(() => {
       // Initial setup
       gsap.set([headerRef.current, formRef.current, visualsRef.current], {
@@ -209,52 +215,48 @@ const Numerology = () => {
       // Create timeline
       const tl = gsap.timeline({ delay: 0.2 });
 
-      // Animate elements
+      // OPTIMIZED: Faster animations
       tl.to(headerRef.current, {
         opacity: 1,
         y: 0,
-        duration: 1,
-        ease: "power3.out",
+        duration: 0.6, // Reduced from 1s
+        ease: "power2.out", // Simpler easing
       })
         .to(
           formRef.current,
           {
             opacity: 1,
             y: 0,
-            duration: 0.8,
-            ease: "power3.out",
+            duration: 0.5, // Reduced from 0.8s
+            ease: "power2.out",
           },
-          "-=0.6",
+          "-=0.4", // Reduced overlap
         )
         .to(
           visualsRef.current,
           {
             opacity: 1,
             y: 0,
-            duration: 0.8,
-            ease: "power3.out",
+            duration: 0.5, // Reduced from 0.8s
+            ease: "power2.out",
           },
-          "-=0.4",
+          "-=0.3", // Reduced overlap
         );
 
-      // Cards animation
-      const cards = pageRef.current?.querySelectorAll(".number-card");
-      if (cards) {
+      // OPTIMIZED: Cards animation with simpler easing
+      const cardsNodeList = pageRef.current?.querySelectorAll(".number-card");
+      if (cardsNodeList && cardsNodeList.length > 0) {
+        const cards = Array.from(cardsNodeList);
         gsap.fromTo(
           cards,
-          { opacity: 0, scale: 0.8, y: 30 },
+          { opacity: 0, scale: 0.9, y: 20 }, // Reduced initial transform
           {
             opacity: 1,
             scale: 1,
             y: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: "back.out(1.7)",
-            scrollTrigger: {
-              trigger: cards[0],
-              start: "top 80%",
-              toggleActions: "play none none reverse",
-            },
+            duration: 0.4, // Reduced from 0.6s
+            stagger: 0.08, // Reduced stagger
+            ease: "power2.out", // Simpler easing instead of back.out
           },
         );
       }
@@ -300,8 +302,8 @@ const Numerology = () => {
     clearInterval(progressInterval);
     setCalculationProgress(100);
 
-    setTimeout(() => {
-      setResult({
+    setTimeout(async () => {
+      const numerologyResult = {
         lifePathNumber,
         destinyNumber,
         soulNumber,
@@ -313,8 +315,41 @@ const Numerology = () => {
         interpretation: getLifePathInterpretation(lifePathNumber),
         compatibility: getCompatibilityNumbers(lifePathNumber),
         luckyNumbers: getLuckyNumbers(lifePathNumber),
-      });
+      };
+      
+      setResult(numerologyResult);
       setIsCalculating(false);
+
+        // Automatically save numerology reading to Dashboard (only if user is authenticated)
+        try {
+          const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+          if (token) {
+            const { apiService } = await import("@/lib/apiService");
+            // Get latest palm reading for integration (if available)
+            const palmReadingId = await apiService.getLatestPalmReadingId();
+            await apiService.saveReading({
+              reading_type: "numerology",
+              result: numerologyResult,
+              accuracy: 95, // Numerology calculations are deterministic
+              palm_reference_id: palmReadingId || undefined, // Link to palm reading if available
+            });
+            console.log("✅ Numerology reading saved to Dashboard", palmReadingId ? `(linked to palm reading ${palmReadingId})` : "");
+            // Trigger Dashboard refresh event
+            window.dispatchEvent(new CustomEvent("reading-saved", { 
+              detail: { reading_type: "numerology" } 
+            }));
+          } else {
+            console.log("ℹ️ User not logged in - reading available locally only");
+          }
+        } catch (error: any) {
+          // Only log if it's not an authentication error (which is expected for non-logged-in users)
+          if (error?.message?.includes("Not authenticated")) {
+            console.log("ℹ️ Please log in to save readings to your Dashboard");
+          } else {
+            console.warn("⚠️ Failed to save numerology reading to Dashboard:", error);
+          }
+          // Don't throw - reading is still available locally
+        }
     }, 500);
   };
 
@@ -708,14 +743,22 @@ const Numerology = () => {
     }
   };
 
+  // Authentication removed - no login check needed
+
   return (
     <div
       ref={pageRef}
       className="min-h-screen page-container relative overflow-hidden"
     >
-      {/* Fixed star background */}
+      {/* Enhanced star background with gradients */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="stars-bg absolute inset-0"></div>
+        {/* Additional gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-purple-900/40 to-blue-900/50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-900/20 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/30 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(139,92,246,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,_rgba(59,130,246,0.15),transparent_50%)]" />
       </div>
 
       {/* 3D Background */}
@@ -723,53 +766,69 @@ const Numerology = () => {
 
       <Navbar />
 
-      {/* Header */}
-      <section
-        ref={headerRef}
-        className="pt-16 sm:pt-20 pb-8 sm:pb-12 relative z-10"
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Badge className="mb-4 sm:mb-6 px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-lg bg-purple-100 text-purple-700 border-purple-300">
-            <Calculator className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">✨ </span>Numerology Reading
-          </Badge>
-          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-gray-900 leading-tight">
-            Discover Your{" "}
-            <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-amber-600 bg-clip-text text-transparent block sm:inline">
-              Sacred Numbers
-            </span>
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed px-2">
-            Unlock the ancient wisdom of numbers and discover your life path,
-            destiny, and soul purpose through the mystical science of
-            numerology.
-          </p>
-        </div>
-      </section>
+      {/* Enhanced Main Page Header */}
+      <div ref={headerRef} className="text-center mb-10 mt-24 relative z-10 px-4">
+        <h1
+          className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4"
+          style={{
+            fontFamily: `'Playfair Display', 'DM Serif Display', 'Cinzel', serif`,
+            color: '#fff',
+            textShadow: '0 2px 12px rgba(0,0,0,0.3)',
+            letterSpacing: '0.02em',
+            lineHeight: 1.2,
+          }}
+        >
+          Discover Your{' '}
+          <span 
+            className="inline-block"
+            style={{
+              background: 'linear-gradient(135deg, #a78bfa, #fbbf24, #60a5fa, #ec4899)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              backgroundSize: '200% 200%',
+              animation: 'gradient-shift 5s ease infinite',
+            }}
+          >
+            Sacred Numbers
+          </span>
+        </h1>
+        <p
+          className="text-sm md:text-base max-w-2xl mx-auto mb-6 leading-relaxed text-gray-300"
+        >
+          Unlock the ancient wisdom of numbers and discover your life path, destiny, and soul purpose through the mystical science of numerology.
+        </p>
+        <style>{`
+          @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+          }
+        `}</style>
+      </div>
 
-      <main className="pb-8 sm:pb-12 relative z-10">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="pb-6 sm:pb-8 pt-6 sm:pt-8 relative z-10">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-8">
           {!result ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 max-w-6xl mx-auto">
-              {/* Calculator Form */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-12 max-w-6xl mx-auto">
+              {/* Enhanced Calculator Form */}
               <div ref={formRef} className="order-2 lg:order-1">
-                <Card className="bg-white/90 backdrop-blur-lg border-gray-200/50 shadow-2xl">
-                  <CardHeader className="text-center pb-4 sm:pb-6 px-4 sm:px-6">
-                    <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-                      <Calculator className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
-                      <span className="text-center">
-                        Sacred Number Calculator
-                      </span>
+                <Card className="glass-card border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20 rounded-2xl">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg font-bold flex items-center gap-2 text-white">
+                      <div className="p-2 rounded-lg bg-purple-500/20 border border-purple-400/30">
+                        <Calculator className="w-4 h-4 text-purple-300" />
+                      </div>
+                      Sacred Number Calculator
                     </CardTitle>
-                    <p className="text-sm sm:text-base text-gray-600 mt-2 px-2">
+                    <p className="text-sm text-gray-300">
                       Enter your details to reveal your numerological blueprint
                     </p>
                   </CardHeader>
-                  <CardContent className="space-y-6 sm:space-y-8 px-4 sm:px-6">
+                  <CardContent className="space-y-5">
                     <div>
                       <Label
                         htmlFor="fullName"
-                        className="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3 block"
+                        className="text-sm font-medium text-white mb-2 block"
                       >
                         Full Birth Name
                       </Label>
@@ -778,20 +837,19 @@ const Numerology = () => {
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="Enter your complete birth name"
-                        className="text-base sm:text-lg p-3 sm:p-4 border-gray-300 focus:border-purple-500 focus:ring-purple-500 min-h-[44px] touch-manipulation"
+                        className="text-sm bg-white/10 border-purple-400/30 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50 rounded-lg"
                         autoComplete="name"
                         autoCapitalize="words"
                       />
-                      <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
-                        Use the name exactly as it appears on your birth
-                        certificate
+                      <p className="text-xs text-gray-400 mt-1.5">
+                        Use the name exactly as it appears on your birth certificate
                       </p>
                     </div>
 
                     <div>
                       <Label
                         htmlFor="birthDate"
-                        className="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3 block"
+                        className="text-sm font-medium text-white mb-2 block"
                       >
                         Birth Date
                       </Label>
@@ -800,36 +858,30 @@ const Numerology = () => {
                         type="date"
                         value={birthDate}
                         onChange={(e) => setBirthDate(e.target.value)}
-                        className="text-base sm:text-lg p-3 sm:p-4 border-gray-300 focus:border-purple-500 focus:ring-purple-500 min-h-[44px] touch-manipulation"
+                        className="text-sm bg-white/10 border-purple-400/30 text-white focus:border-purple-400 focus:ring-purple-400/50 rounded-lg"
                         max={new Date().toISOString().split("T")[0]}
                       />
                     </div>
 
                     {isCalculating && (
-                      <div className="space-y-3 sm:space-y-4">
-                        <div className="flex items-center gap-2 sm:gap-3 text-purple-700">
-                          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 animate-spin flex-shrink-0" />
-                          <span className="font-medium text-sm sm:text-base">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-purple-300">
+                          <Sparkles className="w-4 h-4 animate-spin flex-shrink-0" />
+                          <span className="font-medium text-sm">
                             Calculating your sacred numbers...
                           </span>
                         </div>
-                        <Progress
-                          value={calculationProgress}
-                          className="h-2 sm:h-3"
-                        />
+                        <Progress value={calculationProgress} className="h-2" />
                       </div>
                     )}
 
                     <Button
                       onClick={calculateLifePath}
                       disabled={!birthDate || !fullName || isCalculating}
-                      className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-amber-600 hover:from-purple-700 hover:via-blue-700 hover:to-amber-700 text-white text-base sm:text-lg py-3 sm:py-4 rounded-xl shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-300 min-h-[48px] touch-manipulation"
-                      size="lg"
+                      className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-amber-600 hover:from-purple-700 hover:via-blue-700 hover:to-amber-700 text-white text-sm py-3 rounded-xl shadow-lg shadow-purple-500/30 transform hover:scale-[1.02] active:scale-95 transition-all duration-300 font-medium"
                     >
-                      <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
-                      <span className="truncate">
+                      <Sparkles className="w-4 h-4 mr-2" />
                         {isCalculating ? "Calculating..." : "Reveal My Numbers"}
-                      </span>
                     </Button>
                   </CardContent>
                 </Card>
@@ -841,24 +893,26 @@ const Numerology = () => {
                 className="space-y-6 sm:space-y-8 order-1 lg:order-2"
               >
                 {/* Number Meanings */}
-                <Card className="bg-white/90 backdrop-blur-lg border-gray-200/50 shadow-xl">
-                  <CardHeader className="px-4 sm:px-6">
-                    <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                      <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                <Card className="glass-card border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/20 rounded-2xl">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg font-bold flex items-center gap-2 text-white">
+                      <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-400/30">
+                        <Eye className="w-4 h-4 text-blue-300" />
+                      </div>
                       Number Meanings
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="px-4 sm:px-6">
-                    <div className="grid grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-2">
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                         <div
                           key={num}
-                          className="number-card text-center p-2 sm:p-3 lg:p-4 rounded-lg bg-gradient-to-br from-purple-50 to-blue-50 hover:shadow-lg transition-all duration-300 transform hover:scale-105 touch-manipulation"
+                          className="number-card group text-center p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-400/30 hover:border-purple-400/50 transition-all duration-300 transform hover:scale-105"
                         >
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2 text-sm sm:text-base lg:text-xl font-bold">
+                          <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-1.5 text-base font-bold shadow-md group-hover:scale-110 transition-transform">
                             {num}
                           </div>
-                          <p className="text-xs sm:text-sm font-medium text-gray-700 leading-tight">
+                          <p className="text-xs font-medium text-white">
                             {
                               [
                                 "Leader",
@@ -879,55 +933,65 @@ const Numerology = () => {
                   </CardContent>
                 </Card>
 
-                {/* What We Calculate */}
-                <Card className="bg-white/90 backdrop-blur-lg border-gray-200/50 shadow-xl">
-                  <CardHeader className="px-4 sm:px-6">
-                    <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                      <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+                {/* Your Complete Profile */}
+                <Card className="glass-card border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20 rounded-2xl">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg font-bold flex items-center gap-2 text-white">
+                      <div className="p-2 rounded-lg bg-purple-500/20 border border-purple-400/30">
+                        <Brain className="w-4 h-4 text-purple-300" />
+                      </div>
                       Your Complete Profile
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
+                  <CardContent className="space-y-3">
                     {[
                       {
                         icon: Target,
                         title: "Life Path Number",
                         desc: "Your main life journey and purpose",
-                        color: "text-purple-600",
+                        color: "from-purple-500/30 to-purple-600/30",
+                        borderColor: "border-purple-400/30",
+                        iconColor: "text-purple-300",
                       },
                       {
                         icon: Crown,
                         title: "Destiny Number",
                         desc: "Your life mission and ultimate goal",
-                        color: "text-blue-600",
+                        color: "from-blue-500/30 to-blue-600/30",
+                        borderColor: "border-blue-400/30",
+                        iconColor: "text-blue-300",
                       },
                       {
                         icon: Heart,
                         title: "Soul Number",
                         desc: "Your inner desires and motivations",
-                        color: "text-pink-600",
+                        color: "from-pink-500/30 to-pink-600/30",
+                        borderColor: "border-pink-400/30",
+                        iconColor: "text-pink-300",
                       },
                       {
                         icon: Users,
                         title: "Personality Number",
                         desc: "How others perceive you",
-                        color: "text-green-600",
+                        color: "from-green-500/30 to-green-600/30",
+                        borderColor: "border-green-400/30",
+                        iconColor: "text-green-300",
                       },
                     ].map((item, index) => (
                       <div
                         key={index}
-                        className="flex items-start gap-3 sm:gap-4 p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors touch-manipulation"
+                        className="group flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 border border-white/5 hover:border-purple-400/30 transition-all duration-300"
                       >
                         <div
-                          className={`p-1.5 sm:p-2 rounded-full bg-gray-100 ${item.color} flex-shrink-0`}
+                          className={`p-2 rounded-lg bg-gradient-to-br ${item.color} border ${item.borderColor} group-hover:scale-110 transition-transform flex-shrink-0`}
                         >
-                          <item.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <item.icon className={`w-4 h-4 ${item.iconColor}`} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-semibold text-gray-900 text-sm sm:text-base">
+                          <h4 className="font-medium text-white text-sm">
                             {item.title}
                           </h4>
-                          <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                          <p className="text-xs text-gray-400">
                             {item.desc}
                           </p>
                         </div>
@@ -936,36 +1000,46 @@ const Numerology = () => {
                   </CardContent>
                 </Card>
 
-                {/* Numerology Facts */}
-                <Card className="bg-white/90 backdrop-blur-lg border-gray-200/50 shadow-xl">
-                  <CardHeader className="px-4 sm:px-6">
-                    <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
+                {/* Ancient Wisdom */}
+                <Card className="glass-card border-amber-500/30 hover:border-amber-400/50 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20 rounded-2xl">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg font-bold flex items-center gap-2 text-white">
+                      <div className="p-2 rounded-lg bg-amber-500/20 border border-amber-400/30">
+                        <BookOpen className="w-4 h-4 text-amber-300" />
+                      </div>
                       Ancient Wisdom
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2.5 sm:space-y-3 text-xs sm:text-sm px-4 sm:px-6">
-                    <div className="flex items-start gap-2 sm:gap-3">
-                      <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                      <span className="leading-relaxed">
+                  <CardContent className="space-y-2">
+                    <div className="group flex items-center gap-3 p-2 rounded-lg hover:bg-amber-500/10 transition-all duration-300">
+                      <div className="p-1.5 rounded-md bg-amber-500/20 border border-amber-400/30 flex-shrink-0">
+                        <Star className="w-3.5 h-3.5 text-amber-300" />
+                      </div>
+                      <span className="text-xs text-gray-300">
                         Numerology dates back over 4,000 years
                       </span>
                     </div>
-                    <div className="flex items-start gap-2 sm:gap-3">
-                      <Infinity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500 flex-shrink-0 mt-0.5" />
-                      <span className="leading-relaxed">
+                    <div className="group flex items-center gap-3 p-2 rounded-lg hover:bg-purple-500/10 transition-all duration-300">
+                      <div className="p-1.5 rounded-md bg-purple-500/20 border border-purple-400/30 flex-shrink-0">
+                        <Infinity className="w-3.5 h-3.5 text-purple-300" />
+                      </div>
+                      <span className="text-xs text-gray-300">
                         Pythagoras developed modern numerological systems
                       </span>
                     </div>
-                    <div className="flex items-start gap-2 sm:gap-3">
-                      <Lightbulb className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500 flex-shrink-0 mt-0.5" />
-                      <span className="leading-relaxed">
+                    <div className="group flex items-center gap-3 p-2 rounded-lg hover:bg-blue-500/10 transition-all duration-300">
+                      <div className="p-1.5 rounded-md bg-blue-500/20 border border-blue-400/30 flex-shrink-0">
+                        <Lightbulb className="w-3.5 h-3.5 text-blue-300" />
+                      </div>
+                      <span className="text-xs text-gray-300">
                         Numbers reveal personality patterns and life themes
                       </span>
                     </div>
-                    <div className="flex items-start gap-2 sm:gap-3">
-                      <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="leading-relaxed">
+                    <div className="group flex items-center gap-3 p-2 rounded-lg hover:bg-green-500/10 transition-all duration-300">
+                      <div className="p-1.5 rounded-md bg-green-500/20 border border-green-400/30 flex-shrink-0">
+                        <TrendingUp className="w-3.5 h-3.5 text-green-300" />
+                      </div>
+                      <span className="text-xs text-gray-300">
                         Used for guidance in major life decisions
                       </span>
                     </div>
@@ -975,93 +1049,103 @@ const Numerology = () => {
             </div>
           ) : (
             /* Results Display */
-            <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+            <div className="max-w-5xl mx-auto space-y-5">
               {/* Main Results Header */}
-              <div className="text-center mb-8 sm:mb-12 px-4">
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+              <div className="text-center mb-6 px-4">
+                <h2 className="text-xl sm:text-2xl font-bold mb-2 text-white">
                   Your Numerological Profile
                 </h2>
-                <p className="text-base sm:text-lg lg:text-xl text-gray-600 break-words">
-                  <span className="block sm:inline">{result.fullName}</span>
-                  <span className="hidden sm:inline"> ��� </span>
-                  <span className="block sm:inline">
-                    Born {new Date(birthDate).toLocaleDateString()}
+                <p className="text-sm text-gray-300">
+                  <span>{result.fullName}</span>
+                  <span className="px-2 text-purple-400">•</span>
+                  <span>
+                    Born{" "}
+                    {(() => {
+                      if (!birthDate) return "";
+                      const [y, m, d] = birthDate.split("-");
+                      return `${d}/${m}/${y}`;
+                    })()}
                   </span>
                 </p>
                 <Button
                   onClick={resetCalculation}
                   variant="outline"
-                  className="mt-3 sm:mt-4 border-purple-300 text-purple-700 hover:bg-purple-50 px-4 sm:px-6 py-2 text-sm sm:text-base touch-manipulation"
+                  className="mt-3 border-purple-400/50 text-purple-300 hover:bg-purple-500/10 px-4 py-2 text-sm"
                 >
                   Calculate Another Reading
                 </Button>
               </div>
 
-              {/* Core Numbers Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-12 px-4">
-                {[
-                  {
-                    title: "Life Path",
-                    number: result.lifePathNumber,
-                    color: "from-purple-600 to-blue-600",
-                    icon: Target,
-                  },
-                  {
-                    title: "Destiny",
-                    number: result.destinyNumber,
-                    color: "from-blue-600 to-indigo-600",
-                    icon: Crown,
-                  },
-                  {
-                    title: "Soul",
-                    number: result.soulNumber,
-                    color: "from-pink-600 to-rose-600",
-                    icon: Heart,
-                  },
-                  {
-                    title: "Personality",
-                    number: result.personalityNumber,
-                    color: "from-green-600 to-emerald-600",
-                    icon: Users,
-                  },
-                ].map((item, index) => (
-                  <Card
-                    key={index}
-                    className="bg-white/90 backdrop-blur-lg border-gray-200/50 shadow-xl text-center p-3 sm:p-4 lg:p-6 transform hover:scale-105 active:scale-95 transition-all duration-300 touch-manipulation"
-                  >
-                    <div
-                      className={`w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-gradient-to-r ${item.color} text-white rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 lg:mb-4 text-lg sm:text-2xl lg:text-3xl font-bold shadow-lg`}
-                    >
-                      {item.number}
-                    </div>
-                    <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
-                      <item.icon className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
-                      <span className="text-center leading-tight">
-                        {item.title}
-                      </span>
-                    </h3>
-                  </Card>
-                ))}
-              </div>
+              {/* Calculated Numbers */}
+              <Card className="glass-card border-purple-500/30 hover:border-purple-400/50 shadow-xl hover:shadow-purple-500/20 rounded-2xl mx-4 mb-6 transition-all duration-300">
+                <CardHeader className="text-center pb-3">
+                  <CardTitle className="text-lg font-bold text-white">
+                    Calculated Numbers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-5">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      {
+                        title: "Life Path",
+                        number: result.lifePathNumber,
+                        color: "from-purple-600 to-blue-600",
+                        icon: Target,
+                      },
+                      {
+                        title: "Destiny",
+                        number: result.destinyNumber,
+                        color: "from-blue-600 to-indigo-600",
+                        icon: Crown,
+                      },
+                      {
+                        title: "Soul",
+                        number: result.soulNumber,
+                        color: "from-pink-600 to-rose-600",
+                        icon: Heart,
+                      },
+                      {
+                        title: "Personality",
+                        number: result.personalityNumber,
+                        color: "from-green-600 to-emerald-600",
+                        icon: Users,
+                      },
+                    ].map((item, index) => (
+                      <div
+                        key={index}
+                        className="text-center p-3 rounded-xl bg-gradient-to-br from-white/5 to-white/10 border border-white/10 hover:border-purple-400/50 transition-all duration-300 transform hover:scale-105"
+                      >
+                        <div
+                          className={`w-12 h-12 bg-gradient-to-r ${item.color} text-white rounded-full flex items-center justify-center mx-auto mb-2 text-xl font-bold shadow-lg`}
+                        >
+                          {item.number}
+                        </div>
+                        <h3 className="text-xs font-medium text-white flex items-center justify-center gap-1">
+                          <item.icon className="w-3.5 h-3.5" />
+                            {item.title}
+                        </h3>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Detailed Life Path Analysis */}
-              <Card className="bg-white/90 backdrop-blur-lg border-gray-200/50 shadow-2xl mx-4">
-                <CardHeader className="text-center pb-4 sm:pb-6 px-4 sm:px-6">
-                  <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
-                    <span className="block sm:inline">
-                      Life Path {result.lifePathNumber}:
-                    </span>{" "}
-                    <span className="block sm:inline">
+              <Card className="glass-card border-purple-500/30 hover:border-purple-400/50 shadow-xl hover:shadow-purple-500/20 rounded-2xl mx-4 transition-all duration-300">
+                <CardHeader className="text-center pb-3">
+                  <CardTitle className="text-lg font-bold mb-2 text-white">
+                    Life Path {result.lifePathNumber}:{" "}
+                    <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-amber-400 bg-clip-text text-transparent">
                       {result.interpretation.title}
                     </span>
                   </CardTitle>
-                  <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
+                  <div className="flex flex-wrap justify-center gap-1.5">
                     {result.interpretation.traits.map(
                       (trait: string, index: number) => (
                         <Badge
                           key={index}
                           variant="outline"
-                          className="bg-purple-50 text-purple-700 border-purple-300 text-xs sm:text-sm px-2 py-1"
+                          className="bg-purple-500/10 text-purple-300 border-purple-400/30 text-xs px-2 py-0.5"
                         >
                           {trait}
                         </Badge>
@@ -1069,83 +1153,83 @@ const Numerology = () => {
                     )}
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-6 sm:space-y-8 px-4 sm:px-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-                    <div className="space-y-4 sm:space-y-6">
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-3">
                       <div>
-                        <h4 className="font-semibold text-gray-900 flex items-center gap-2 mb-2 sm:mb-3 text-sm sm:text-base">
-                          <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 flex-shrink-0" />
+                        <h4 className="font-medium text-white flex items-center gap-1.5 mb-1.5 text-sm">
+                          <Star className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />
                           Core Description
                         </h4>
-                        <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                        <p className="text-gray-300 text-xs leading-relaxed">
                           {result.interpretation.description}
                         </p>
                       </div>
 
                       <div>
-                        <h4 className="font-semibold text-gray-900 flex items-center gap-2 mb-2 sm:mb-3 text-sm sm:text-base">
-                          <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                        <h4 className="font-medium text-white flex items-center gap-1.5 mb-1.5 text-sm">
+                          <TrendingUp className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
                           Career Path
                         </h4>
-                        <p className="text-gray-600 text-sm sm:text-base">
+                        <p className="text-gray-300 text-xs">
                           {result.interpretation.career}
                         </p>
                       </div>
 
                       <div>
-                        <h4 className="font-semibold text-gray-900 flex items-center gap-2 mb-2 sm:mb-3 text-sm sm:text-base">
-                          <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" />
+                        <h4 className="font-medium text-white flex items-center gap-1.5 mb-1.5 text-sm">
+                          <Heart className="w-3.5 h-3.5 text-pink-400 flex-shrink-0" />
                           Love & Relationships
                         </h4>
-                        <p className="text-gray-600 text-sm sm:text-base">
+                        <p className="text-gray-300 text-xs">
                           {result.interpretation.love}
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-4 sm:space-y-6">
+                    <div className="space-y-3">
                       <div>
-                        <h4 className="font-semibold text-gray-900 flex items-center gap-2 mb-2 sm:mb-3 text-sm sm:text-base">
-                          <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0" />
+                        <h4 className="font-medium text-white flex items-center gap-1.5 mb-1.5 text-sm">
+                          <Zap className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
                           Core Strengths
                         </h4>
-                        <p className="text-gray-600 text-sm sm:text-base">
+                        <p className="text-gray-300 text-xs">
                           {result.interpretation.strengths}
                         </p>
                       </div>
 
                       <div>
-                        <h4 className="font-semibold text-gray-900 flex items-center gap-2 mb-2 sm:mb-3 text-sm sm:text-base">
-                          <Target className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 flex-shrink-0" />
+                        <h4 className="font-medium text-white flex items-center gap-1.5 mb-1.5 text-sm">
+                          <Target className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
                           Life Challenges
                         </h4>
-                        <p className="text-gray-600 text-sm sm:text-base">
+                        <p className="text-gray-300 text-xs">
                           {result.interpretation.challenges}
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="text-center p-2.5 bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-lg">
                           <div
-                            className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto mb-1 sm:mb-2"
+                            className="w-5 h-5 rounded-full mx-auto mb-1"
                             style={{
                               backgroundColor:
                                 result.interpretation.color.toLowerCase(),
                             }}
                           ></div>
-                          <p className="text-xs sm:text-sm font-medium text-gray-700">
+                          <p className="text-xs font-medium text-purple-100">
                             Lucky Color
                           </p>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-[10px] text-purple-200">
                             {result.interpretation.color}
                           </p>
                         </div>
-                        <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg">
-                          <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-amber-600" />
-                          <p className="text-xs sm:text-sm font-medium text-gray-700">
+                        <div className="text-center p-2.5 bg-gradient-to-br from-amber-900/30 to-yellow-900/30 rounded-lg">
+                          <Sparkles className="w-5 h-5 mx-auto mb-1 text-amber-400" />
+                          <p className="text-xs font-medium text-purple-100">
                             Element
                           </p>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-[10px] text-purple-200">
                             {result.interpretation.element}
                           </p>
                         </div>
@@ -1154,21 +1238,21 @@ const Numerology = () => {
                   </div>
 
                   {/* Additional Information */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-4 sm:pt-6 border-t border-gray-200">
-                    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-                      <CardHeader className="pb-3 sm:pb-4">
-                        <CardTitle className="text-base sm:text-lg text-gray-900 flex items-center gap-2">
-                          <Users className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                  <div className="grid grid-cols-2 gap-3 pt-3 border-t border-purple-400/20">
+                    <Card className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 border-blue-400/20">
+                      <CardHeader className="pb-2 pt-3">
+                        <CardTitle className="text-sm text-white flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5 text-blue-400" />
                           Compatible Numbers
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="flex gap-2 sm:gap-3 justify-center sm:justify-start">
+                      <CardContent className="pt-0 pb-3">
+                        <div className="flex gap-2 justify-center">
                           {result.compatibility.map(
                             (num: number, index: number) => (
                               <div
                                 key={index}
-                                className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm sm:text-base"
+                                className="w-7 h-7 bg-blue-400 text-white rounded-full flex items-center justify-center font-bold text-xs"
                               >
                                 {num}
                               </div>
@@ -1178,20 +1262,20 @@ const Numerology = () => {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200">
-                      <CardHeader className="pb-3 sm:pb-4">
-                        <CardTitle className="text-base sm:text-lg text-gray-900 flex items-center gap-2">
-                          <Star className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+                    <Card className="bg-gradient-to-br from-amber-900/30 to-yellow-900/30 border-amber-400/20">
+                      <CardHeader className="pb-2 pt-3">
+                        <CardTitle className="text-sm text-white flex items-center gap-1.5">
+                          <Star className="w-3.5 h-3.5 text-amber-400" />
                           Lucky Numbers
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="flex gap-2 sm:gap-3 justify-center sm:justify-start">
+                      <CardContent className="pt-0 pb-3">
+                        <div className="flex gap-2 justify-center">
                           {result.luckyNumbers.map(
                             (num: number, index: number) => (
                               <div
                                 key={index}
-                                className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold text-sm sm:text-base"
+                                className="w-7 h-7 bg-amber-400 text-white rounded-full flex items-center justify-center font-bold text-xs"
                               >
                                 {num}
                               </div>
@@ -1205,71 +1289,61 @@ const Numerology = () => {
               </Card>
 
               {/* Share and Download Actions */}
-              <div className="space-y-4 mt-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {/* Download PDF Report */}
-                  <Button
-                    onClick={handleDownload}
-                    disabled={isDownloading}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg"
-                  >
-                    {isDownloading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Download className="h-4 w-4 mr-2" />
-                    )}
-                    {isDownloading ? "Generating..." : "Download PDF"}
-                  </Button>
+              <div className="space-y-3 mt-5 mx-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <Button
+                      onClick={handleDownload}
+                      disabled={isDownloading}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg text-xs px-3 py-2"
+                    size="sm"
+                    >
+                      {isDownloading ? (
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      ) : (
+                      <Download className="h-3.5 w-3.5 mr-1.5" />
+                      )}
+                    {isDownloading ? "..." : "Download"}
+                    </Button>
 
-                  {/* Share Reading */}
-                  <Button
-                    onClick={handleShare}
-                    disabled={isSharing}
-                    variant="outline"
-                    className="border-purple-300 text-purple-700 hover:bg-purple-50"
-                  >
-                    {isSharing ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Share2 className="h-4 w-4 mr-2" />
-                    )}
-                    {isSharing ? "Sharing..." : "Share"}
-                  </Button>
+                    <Button
+                      onClick={handleShare}
+                      disabled={isSharing}
+                      variant="outline"
+                    className="border-purple-400/50 text-purple-300 hover:bg-purple-500/10 rounded-lg text-xs"
+                    size="sm"
+                    >
+                      {isSharing ? (
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      ) : (
+                      <Share2 className="h-3.5 w-3.5 mr-1.5" />
+                      )}
+                    Share
+                    </Button>
 
-                  {/* Share with Report */}
-                  <Button
-                    onClick={handleShareWithReport}
-                    disabled={isSharing}
-                    variant="outline"
-                    className="border-blue-300 text-blue-700 hover:bg-blue-50"
-                  >
-                    {isSharing ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <FileText className="h-4 w-4 mr-2" />
-                    )}
-                    {isSharing ? "Sharing..." : "Share Report"}
-                  </Button>
+                    <Button
+                      onClick={handleShareWithReport}
+                      disabled={isSharing}
+                      variant="outline"
+                    className="border-blue-400/50 text-blue-300 hover:bg-blue-500/10 rounded-lg text-xs"
+                    size="sm"
+                    >
+                      {isSharing ? (
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      ) : (
+                      <FileText className="h-3.5 w-3.5 mr-1.5" />
+                      )}
+                    Report
+                    </Button>
 
-                  {/* Copy to Clipboard */}
-                  <Button
-                    onClick={handleCopyToClipboard}
-                    variant="outline"
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy Summary
-                  </Button>
-                </div>
-
-                {/* Instructions */}
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 max-w-md mx-auto">
-                    <strong>Download PDF:</strong> Get a detailed report •{" "}
-                    <strong>Share:</strong> Share on social media •{" "}
-                    <strong>Share Report:</strong> Include PDF file •{" "}
-                    <strong>Copy:</strong> Copy text summary
-                  </p>
+                    <Button
+                      onClick={handleCopyToClipboard}
+                      variant="outline"
+                    className="border-gray-400/50 text-gray-300 hover:bg-gray-500/10 rounded-lg text-xs"
+                    size="sm"
+                    >
+                    <Copy className="h-3.5 w-3.5 mr-1.5" />
+                    Copy
+                    </Button>
                 </div>
               </div>
             </div>
@@ -1278,31 +1352,32 @@ const Numerology = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-8 sm:py-12 bg-white/80 backdrop-blur-sm relative z-10">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-3 sm:mb-4">
+      <footer className="border-t border-white/10 py-8 relative mt-12">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/40" />
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h3 className="text-xl font-bold mb-3 bg-gradient-to-r from-purple-400 via-blue-400 to-amber-400 bg-clip-text text-transparent">
             PalmAstro Numerology
           </h3>
-          <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto px-4">
-            Discover the hidden meanings in numbers and unlock your spiritual
-            potential through ancient numerological wisdom.
+          <p className="text-sm text-gray-400 mb-5 max-w-lg mx-auto">
+            Discover the hidden meanings in numbers and unlock your spiritual potential through ancient numerological wisdom.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-500">
+          <div className="flex justify-center items-center gap-3 text-sm">
             <a
               href="#"
-              className="hover:text-purple-600 transition-colors touch-manipulation py-2 px-4 sm:p-0"
+              className="px-4 py-2 rounded-lg bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/50 transition-all duration-300 text-gray-300 hover:text-white text-sm"
             >
               About Numerology
             </a>
             <a
               href="#"
-              className="hover:text-purple-600 transition-colors touch-manipulation py-2 px-4 sm:p-0"
+              className="px-4 py-2 rounded-lg bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-400/50 transition-all duration-300 text-gray-300 hover:text-white text-sm"
             >
               Number Meanings
             </a>
             <a
               href="#"
-              className="hover:text-purple-600 transition-colors touch-manipulation py-2 px-4 sm:p-0"
+              onClick={(e) => { e.preventDefault(); resetCalculation(); }}
+              className="px-4 py-2 rounded-lg bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-400/50 transition-all duration-300 text-gray-300 hover:text-white text-sm"
             >
               Calculate Again
             </a>
