@@ -41,8 +41,15 @@ In your Django `settings.py`, add your Vercel domain:
 
 ```python
 CORS_ALLOWED_ORIGINS = [
-    "https://your-app.vercel.app",
-    "https://your-custom-domain.com",
+    "https://theastroverse.live",
+    "https://www.theastroverse.live",
+    "https://astrology-new.vercel.app",  # Vercel default domain
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://theastroverse.live",
+    "https://www.theastroverse.live",
+    "https://astrology-new.vercel.app",
 ]
 ```
 
@@ -50,17 +57,20 @@ CORS_ALLOWED_ORIGINS = [
 
 #### Option A: Via Dashboard (Easiest)
 
-1. [ ] Go to https://vercel.com/new
-2. [ ] Import your GitHub repository
+1. [ ] Go to https://vercel.com/akashzeen-1520s-projects or https://vercel.com/new
+2. [ ] Import your GitHub repository: `akashzeen-art/astrology`
 3. [ ] Configure:
-   - Framework: Vite
+   - Framework: Vite (auto-detected)
    - Root Directory: `./`
    - Build Command: `npm run build`
    - Output Directory: `dist`
 4. [ ] Add Environment Variables:
    - `VITE_API_BASE_URL` = `https://your-backend-url/api/v1`
    - `VITE_USE_MOCK_API` = `false`
+   - `VITE_ENABLE_ANALYTICS` = `true`
+   - `VITE_ENABLE_PAYMENTS` = `true`
 5. [ ] Click "Deploy"
+6. [ ] Add custom domain: `theastroverse.live` in Settings → Domains
 
 #### Option B: Via CLI
 
@@ -99,12 +109,18 @@ Go to Project Settings → Environment Variables:
 - [ ] Check browser console for errors
 - [ ] Verify CORS is working
 
-### 7. Custom Domain (Optional)
+### 7. Custom Domain Setup
 
-- [ ] Add custom domain in Vercel settings
-- [ ] Update DNS records
-- [ ] Update backend CORS with new domain
-- [ ] Test with custom domain
+- [ ] Go to Vercel project → Settings → Domains
+- [ ] Add domain: `theastroverse.live`
+- [ ] Add domain: `www.theastroverse.live` (optional)
+- [ ] Configure DNS records at your domain registrar:
+  - A record: `@` → `76.76.21.21` (or CNAME to `cname.vercel-dns.com`)
+  - CNAME: `www` → `cname.vercel-dns.com`
+- [ ] Wait for DNS propagation (usually minutes to hours)
+- [ ] Verify SSL certificate is active
+- [ ] Update backend CORS with `https://theastroverse.live`
+- [ ] Test site at https://theastroverse.live
 
 ## 🐛 Troubleshooting
 
