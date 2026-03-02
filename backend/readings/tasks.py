@@ -160,9 +160,9 @@ Respond ONLY with strict JSON of the form: {"is_palm": true} or {"is_palm": fals
         data = json.loads(json_str)
         return bool(data.get("is_palm"))
     except Exception:
-        # On any other validation error, be safe and treat as non-palm so we don't analyze invalid images
-        log.exception("Palm image validation failed, treating as invalid image")
-        return False
+        # On validation/API error, allow image to pass so we don't block users due to flakiness
+        log.warning("Palm image validation failed (exception), allowing image to pass")
+        return True
 
 
 def _load_palm_prompt_template() -> str:
