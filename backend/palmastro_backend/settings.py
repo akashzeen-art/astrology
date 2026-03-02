@@ -183,36 +183,40 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 
+# Production domain: https://www.theastroverse.live
 _default_cors_origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://theastroverse.live",
+    "https://www.theastroverse.live",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    origin
-    for origin in os.getenv(
-        "CORS_ALLOWED_ORIGINS",
-        ",".join(_default_cors_origins),
-    ).split(",")
-    if origin
-]
+# Merge env CORS_ALLOWED_ORIGINS with defaults (no duplicates)
+_env_cors = os.getenv("CORS_ALLOWED_ORIGINS", "")
+_env_origins = [o.strip() for o in _env_cors.split(",") if o.strip()]
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_default_cors_origins + _env_origins))
 
-# Also allow any localhost / 127.0.0.1 port via regex (covers 3000, 5173, etc.)
+# Also allow localhost / 127.0.0.1 and theastroverse.live via regex
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://localhost:\d+$",
     r"^http://127\.0\.0\.1:\d+$",
+    r"^https://(www\.)?theastroverse\.live$",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    origin
-    for origin in os.getenv(
-        "CSRF_TRUSTED_ORIGINS",
-        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000",
-    ).split(",")
-    if origin
+# CSRF trusted origins (same as CORS for theastroverse.live)
+_default_csrf_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://theastroverse.live",
+    "https://www.theastroverse.live",
 ]
+_env_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")
+_env_csrf_list = [o.strip() for o in _env_csrf.split(",") if o.strip()]
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(_default_csrf_origins + _env_csrf_list))
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = os.getenv("DJANGO_SECURE_SSL_REDIRECT", "false").lower() == "true"

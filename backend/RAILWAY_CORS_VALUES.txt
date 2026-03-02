@@ -1,0 +1,5 @@
+CORS_ALLOWED_ORIGINS
+https://theastroverse.live,https://www.theastroverse.live,https://astrology-swart-pi.vercel.app
+
+CSRF_TRUSTED_ORIGINS
+https://theastroverse.live,https://www.theastroverse.live,https://astrology-swart-pi.vercel.app
