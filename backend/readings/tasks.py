@@ -533,7 +533,15 @@ Return ONLY the JSON object, nothing else.
             response_format={"type": "json_object"},  # Force JSON mode for faster parsing
         )
 
-    response = retry_on_rate_limit(_make_request, max_retries=2, base_delay=1.0)
+    try:
+        response = retry_on_rate_limit(_make_request, max_retries=2, base_delay=1.0)
+    except Exception as e:
+        # Convert OpenAI/httpx timeouts into a user-facing error.
+        if "timeout" in str(e).lower():
+            raise ValueError(
+                "OpenAI request timed out. Please try again with a clearer, well-lit image."
+            )
+        raise
 
     content = response.choices[0].message.content or ""
     
