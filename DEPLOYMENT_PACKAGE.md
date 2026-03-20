@@ -53,7 +53,7 @@ backend/
 ### Required Variables:
 ```bash
 # OpenAI
-OPENAI_API_KEY=sk-proj-your-actual-key-here
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 OPENAI_MODEL=gpt-4o-mini
 
 # Django

@@ -87,7 +87,7 @@ Get notified before you hit your budget:
 3. Give it a name (e.g., `PalmAstro-Production` or `PalmAstro-Dev`)
 4. Click **"Create secret key"**
 5. **⚠️ IMPORTANT:** Copy the key immediately! It will only be shown once.
-   - Example format: `sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+   - Example format: `YOUR_OPENAI_API_KEY` (keep the exact key you receive from OpenAI)
 6. Store it securely (you'll add it to your `.env` file next)
 
 **Security Tips:**
@@ -109,7 +109,7 @@ Get notified before you hit your budget:
 2. Add or update these lines:
    ```env
    # OpenAI Configuration
-   OPENAI_API_KEY=sk-proj-your-actual-key-here
+   OPENAI_API_KEY=YOUR_OPENAI_API_KEY
    OPENAI_MODEL=gpt-4o-mini
    ```
 
@@ -133,7 +133,7 @@ For production servers (like Heroku, AWS, DigitalOcean):
 
 1. Set environment variables in your hosting platform:
    ```bash
-   OPENAI_API_KEY=sk-proj-your-actual-key-here
+   OPENAI_API_KEY=YOUR_OPENAI_API_KEY
    OPENAI_MODEL=gpt-4o-mini
    ```
 
@@ -292,7 +292,7 @@ For production servers (like Heroku, AWS, DigitalOcean):
 
 **Solution:**
 1. Check if `.env` file exists in `backend/` directory
-2. Verify the key is spelled correctly: `OPENAI_API_KEY=sk-proj-...`
+2. Verify the key is spelled correctly: `OPENAI_API_KEY=YOUR_OPENAI_API_KEY`
 3. Restart Django server after adding/updating `.env`
 4. Check if `python-dotenv` is installed: `pip install python-dotenv`
 
@@ -329,7 +329,7 @@ Add these to your `backend/.env`:
 
 ```env
 # OpenAI Configuration
-OPENAI_API_KEY=sk-proj-your-actual-key-here
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 OPENAI_MODEL=gpt-4o-mini
 
 # Optional: Override model per feature (if needed later)
