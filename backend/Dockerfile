@@ -12,6 +12,6 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY . /app
 
-CMD ["sh", "-c", "gunicorn palmastro_backend.wsgi:application --bind 0.0.0.0:${PORT:-8000} --timeout 120 --graceful-timeout 30"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn palmastro_backend.wsgi:application --bind 0.0.0.0:${PORT:-8000} --timeout 120 --graceful-timeout 30"]
 
 

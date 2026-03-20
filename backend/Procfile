@@ -1,1 +1,1 @@
-web: gunicorn palmastro_backend.wsgi --bind 0.0.0.0:$PORT --timeout 120 --graceful-timeout 30
+web: python manage.py migrate --noinput && gunicorn palmastro_backend.wsgi --bind 0.0.0.0:$PORT --timeout 120 --graceful-timeout 30
