@@ -12,14 +12,9 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me-in-production")
 
 DEBUG = os.getenv("DJANGO_DEBUG", "true").lower() == "true"
 
-ALLOWED_HOSTS: list[str] = [
-    h.strip()
-    for h in os.getenv(
-        "DJANGO_ALLOWED_HOSTS",
-        "localhost,127.0.0.1,.up.railway.app,.railway.app",
-    ).split(",")
-    if h.strip()
-]
+ALLOWED_HOSTS: list[str] = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(
+    ","
+)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -188,40 +183,50 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 
-# Production domain: https://www.theastroverse.live
 _default_cors_origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://theastroverse.live",
-    "https://www.theastroverse.live",
 ]
 
-# Merge env CORS_ALLOWED_ORIGINS with defaults (no duplicates)
-_env_cors = os.getenv("CORS_ALLOWED_ORIGINS", "")
-_env_origins = [o.strip() for o in _env_cors.split(",") if o.strip()]
-CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_default_cors_origins + _env_origins))
+_production_cors_origins = [
+    # Production web app
+    "https://aipalmastro.com",
+    "https://www.aipalmastro.com",
+]
 
-# Also allow localhost / 127.0.0.1 and theastroverse.live via regex
+# Merge env-provided origins with local defaults and known production origins.
+# This avoids accidental "localhost-only" CORS configs in deployment from breaking
+# the real frontend domain.
+_env_cors_origins_raw = os.getenv("CORS_ALLOWED_ORIGINS")
+_env_cors_origins = (
+    [o for o in _env_cors_origins_raw.split(",") if o] if _env_cors_origins_raw else []
+)
+_merged_cors_origins = _env_cors_origins + _default_cors_origins + _production_cors_origins
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_merged_cors_origins))
+
+# Also allow any localhost / 127.0.0.1 port via regex (covers 3000, 5173, etc.)
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://localhost:\d+$",
     r"^http://127\.0\.0\.1:\d+$",
-    r"^https://(www\.)?theastroverse\.live$",
+    r"^https://aipalmastro\.com$",
+    r"^https://www\.aipalmastro\.com$",
 ]
 
-# CSRF trusted origins (same as CORS for theastroverse.live)
-_default_csrf_origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://theastroverse.live",
-    "https://www.theastroverse.live",
-]
-_env_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")
-_env_csrf_list = [o.strip() for o in _env_csrf.split(",") if o.strip()]
-CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(_default_csrf_origins + _env_csrf_list))
+CSRF_TRUSTED_ORIGINS = list(
+    dict.fromkeys(
+        [
+            origin
+            for origin in os.getenv(
+                "CSRF_TRUSTED_ORIGINS",
+                "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000",
+            ).split(",")
+            if origin
+        ]
+        + _production_cors_origins
+    )
+)
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = os.getenv("DJANGO_SECURE_SSL_REDIRECT", "false").lower() == "true"

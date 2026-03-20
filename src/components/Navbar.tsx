@@ -167,12 +167,13 @@ const Navbar = () => {
             <Link to="/" className="flex items-center gap-1.5 sm:gap-2">
               <div ref={logoRef} className="flex items-center gap-1.5 sm:gap-2">
                 <div className="relative">
-                  <Hand className="logo-icon h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-purple-400" />
+                  <img 
+                    src="/logo.png" 
+                    alt="TheAstroVerse Logo" 
+                    className="logo-icon h-40 w-40 sm:h-42 sm:w-42 md:h-44 md:w-44 object-contain" 
+                  />
                   <Sparkles className="premium-sparkle absolute -top-0.5 -right-0.5 h-2 w-2 sm:h-2.5 sm:w-2.5 text-amber-400" />
                 </div>
-                <span className="logo-text text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                  PalmAstro
-                </span>
               </div>
             </Link>
 

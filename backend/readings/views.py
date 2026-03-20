@@ -69,13 +69,9 @@ class ReadingUploadView(views.APIView):
             raw_bytes = base64.b64decode(b64data)
 
         if raw_bytes and not is_palm_image(raw_bytes):
-            return Response(
-                {
-                    "status": "error",
-                    "message": "Invalid image: Please upload a proper hand/palm image.",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            # Avoid false negatives from the lightweight image classifier.
+            # Let the main analysis step decide if it can extract palm reading data.
+            pass
 
         # Authentication removed - create reading without user
         reading = Reading.objects.create(user=None)

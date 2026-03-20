@@ -95,6 +95,31 @@ def is_palm_image(image_bytes: bytes) -> bool:
     Use OpenAI vision to verify that the image contains a human hand/palm.
     Returns True if confident it's a palm image, False otherwise.
     """
+    def _detect_image_mime(b: bytes) -> str:
+        """
+        Lightweight magic-number detection so we can build the correct
+        `data:image/<type>;base64,...` URL for OpenAI.
+        """
+        if len(b) >= 3 and b[0:3] == b"\xff\xd8\xff":
+            return "image/jpeg"
+        if len(b) >= 8 and b[0:8] == b"\x89PNG\r\n\x1a\n":
+            return "image/png"
+        # WebP: "RIFF"...."WEBP"
+        if len(b) >= 12 and b[0:4] == b"RIFF" and b[8:12] == b"WEBP":
+            return "image/webp"
+        if len(b) >= 6 and (b[0:6] == b"GIF87a" or b[0:6] == b"GIF89a"):
+            return "image/gif"
+        # HEIC/HEIF: ISO base media file format often starts with:
+        # .... ftyp heic|heix|mif1|msf1 ...
+        if len(b) >= 12 and b[4:8] == b"ftyp":
+            brand = b[8:12]
+            if brand in (b"heic", b"heix"):
+                return "image/heic"
+            if brand in (b"mif1", b"msf1"):
+                return "image/heif"
+        # Fallback: many clients produce JPEGs; keep behavior stable.
+        return "image/jpeg"
+
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         # If no key, we can't validate; allow image to pass rather than block everything
@@ -110,6 +135,7 @@ def is_palm_image(image_bytes: bytes) -> bool:
 
     try:
         b64 = base64.b64encode(image_bytes).decode("utf-8")
+        mime = _detect_image_mime(image_bytes)
         prompt = """
 You are an image classifier. Determine if the image clearly shows a human hand or palm suitable for palm reading.
 Respond ONLY with strict JSON of the form: {"is_palm": true} or {"is_palm": false}.
@@ -132,7 +158,7 @@ Respond ONLY with strict JSON of the form: {"is_palm": true} or {"is_palm": fals
                             {
                                 "type": "image_url",
                                 "image_url": {
-                                    "url": f"data:image/jpeg;base64,{b64}",
+                                    "url": f"data:{mime};base64,{b64}",
                                 },
                             },
                         ],
@@ -160,8 +186,9 @@ Respond ONLY with strict JSON of the form: {"is_palm": true} or {"is_palm": fals
         data = json.loads(json_str)
         return bool(data.get("is_palm"))
     except Exception:
-        # On validation/API error, allow image to pass so we don't block users due to flakiness
-        log.warning("Palm image validation failed (exception), allowing image to pass")
+        # Validation failures (unsupported mime, JSON parse issues, transient API
+        # problems) should not hard-block uploads.
+        log.exception("Palm image validation failed; skipping validation for this request.")
         return True
 
 
@@ -198,7 +225,28 @@ def _run_gpt_palm_model(image_path: str) -> Dict:
     client = OpenAI(api_key=api_key)
 
     with open(image_path, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode("utf-8")
+        image_bytes = f.read()
+        b64 = base64.b64encode(image_bytes).decode("utf-8")
+
+    def _detect_image_mime(b: bytes) -> str:
+        if len(b) >= 3 and b[0:3] == b"\xff\xd8\xff":
+            return "image/jpeg"
+        if len(b) >= 8 and b[0:8] == b"\x89PNG\r\n\x1a\n":
+            return "image/png"
+        # WebP: "RIFF"...."WEBP"
+        if len(b) >= 12 and b[0:4] == b"RIFF" and b[8:12] == b"WEBP":
+            return "image/webp"
+        if len(b) >= 6 and (b[0:6] == b"GIF87a" or b[0:6] == b"GIF89a"):
+            return "image/gif"
+        if len(b) >= 12 and b[4:8] == b"ftyp":
+            brand = b[8:12]
+            if brand in (b"heic", b"heix"):
+                return "image/heic"
+            if brand in (b"mif1", b"msf1"):
+                return "image/heif"
+        return "image/jpeg"
+
+    mime = _detect_image_mime(image_bytes)
 
     prompt = _load_palm_prompt_template()
     
@@ -470,7 +518,7 @@ Return ONLY the JSON object, nothing else.
                         {
                             "type": "image_url",
                             "image_url": {
-                                "url": f"data:image/jpeg;base64,{b64}",
+                                "url": f"data:{mime};base64,{b64}",
                             },
                         },
                     ],
