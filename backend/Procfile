@@ -1,1 +1,1 @@
-web: gunicorn palmastro_backend.wsgi --bind 0.0.0.0:$PORT
+web: gunicorn palmastro_backend.wsgi --bind 0.0.0.0:$PORT --timeout 120 --graceful-timeout 30

@@ -217,12 +217,16 @@ def _run_gpt_palm_model(image_path: str) -> Dict:
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not set")
 
+    # Hard cap OpenAI request duration so Gunicorn workers don't hit
+    # "WORKER TIMEOUT" and get killed mid-request.
+    openai_timeout = float(os.getenv("OPENAI_REQUEST_TIMEOUT_SECONDS", "20"))
+
     # Some Windows environments set SSL_CERT_FILE to a missing path, which breaks httpx/OpenAI.
     ssl_cert = os.environ.get("SSL_CERT_FILE")
     if ssl_cert and not os.path.exists(ssl_cert):
         os.environ.pop("SSL_CERT_FILE", None)
 
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=api_key, timeout=openai_timeout)
 
     with open(image_path, "rb") as f:
         image_bytes = f.read()
@@ -529,7 +533,7 @@ Return ONLY the JSON object, nothing else.
             response_format={"type": "json_object"},  # Force JSON mode for faster parsing
         )
 
-    response = retry_on_rate_limit(_make_request, max_retries=3, base_delay=2.0)
+    response = retry_on_rate_limit(_make_request, max_retries=2, base_delay=1.0)
 
     content = response.choices[0].message.content or ""
     
