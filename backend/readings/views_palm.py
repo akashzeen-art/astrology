@@ -3,12 +3,15 @@ from __future__ import annotations
 from typing import Any
 
 import base64
+import logging
 import os
 import tempfile
 from pathlib import Path
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import permissions, status, views
+
+log = logging.getLogger(__name__)
 from rest_framework.request import Request
 from rest_framework.response import Response
 
