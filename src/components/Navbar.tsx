@@ -21,6 +21,8 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import AuthModal from "./AuthModal";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 import gsap from "gsap";
 
 const Navbar = () => {
@@ -29,6 +31,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { tr } = useLanguage();
   const navRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const linksRef = useRef<HTMLDivElement>(null);
@@ -124,11 +127,11 @@ const Navbar = () => {
 
   // Navigation links (always visible - no authentication required)
   const navLinks = [
-    { path: "/", label: "Home" },
-    { path: "/palm-analysis", label: "Palm Reading" },
-    { path: "/numerology", label: "Numerology" },
-    { path: "/astrology", label: "Astrology" },
-    { path: "/dashboard", label: "Dashboard" },
+    { path: "/", label: tr.nav.home },
+    { path: "/palm-analysis", label: tr.nav.palmReading },
+    { path: "/numerology", label: tr.nav.numerology },
+    { path: "/astrology", label: tr.nav.astrology },
+    { path: "/dashboard", label: tr.nav.dashboard },
   ];
 
   // Allow other components/pages to open the auth modal via a global event
@@ -198,7 +201,8 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Auth */}
-            <div ref={authRef} className="hidden md:flex items-center gap-4">
+            <div ref={authRef} className="hidden md:flex items-center gap-3">
+              <LanguageSwitcher />
               {user ? (
                 <div className="flex items-center gap-4">
                   <DropdownMenu>
@@ -262,31 +266,33 @@ const Navbar = () => {
                     onClick={() => setIsAuthModalOpen(true)}
                     className="text-muted-foreground hover:text-yellow-300"
                   >
-                    Sign In
+                    {tr.nav.signIn}
                   </Button>
                   <Button
                     onClick={() => setIsAuthModalOpen(true)}
                     className="bg-stellar-gradient hover:opacity-90 stellar-glow"
                   >
-                    Get Started
+                    {tr.nav.getStarted}
                   </Button>
                 </div>
               )}
             </div>
 
             {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={toggleMobileMenu}
-            >
+            <div className="md:hidden flex items-center gap-2">
+              <LanguageSwitcher />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleMobileMenu}
+              >
               {isMobileMenuOpen ? (
                 <X className="h-5 w-5" />
               ) : (
                 <Menu className="h-5 w-5" />
               )}
-            </Button>
+              </Button>
+            </div>
           </div>
 
           {/* Mobile Navigation */}

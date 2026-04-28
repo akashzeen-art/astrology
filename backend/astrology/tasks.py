@@ -230,7 +230,7 @@ def retry_on_rate_limit(
     raise RuntimeError("Unexpected error in retry logic")
 
 
-def _build_prompt(session: AstrologySession) -> str:
+def _build_prompt(session: AstrologySession, language: str = "en") -> str:
     try:
         full_name = decrypt_value(session.full_name) or ""
         gender = decrypt_value(session.gender) or ""
@@ -284,6 +284,7 @@ def _build_prompt(session: AstrologySession) -> str:
         "moon_sign": chart.moon_sign if chart else None,
         "rising_sign": chart.rising_sign if chart else None,
         "chart_metadata": chart.metadata if chart else {},
+        "language": language,
     }
 
     try:
@@ -358,7 +359,7 @@ def _call_openai(prompt: str) -> Dict[str, Any]:
 
 
 @shared_task
-def generate_astrology_reading(session_id: str) -> None:
+def generate_astrology_reading(session_id: str, language: str = "en") -> None:
     try:
         session = AstrologySession.objects.get(session_id=session_id)
         if session.status not in {AstrologyStatus.PENDING, AstrologyStatus.IN_PROGRESS}:
@@ -374,7 +375,7 @@ def generate_astrology_reading(session_id: str) -> None:
             log.info("Using mock astrology data for session %s (USE_MOCK_ASTROLOGY=true)", session_id)
             result = _generate_mock_astrology_result(session)
         else:
-            prompt = _build_prompt(session)
+            prompt = _build_prompt(session, language=language)
             try:
                 result = _call_openai(prompt)
             except (RateLimitError, RuntimeError) as exc:

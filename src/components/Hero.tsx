@@ -6,6 +6,7 @@ import { ArrowRight, Hand, Stars, Sparkles, Moon } from "lucide-react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -89,6 +90,7 @@ const AnimatedSun = () => {
 };
 
 const Hero = () => {
+  const { tr } = useLanguage();
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
@@ -222,7 +224,7 @@ const Hero = () => {
               className="mb-4 sm:mb-5 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border-purple-500/50 text-purple-300 bg-purple-500/10 backdrop-blur-sm"
             >
               <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-              AI-Powered Mystical Insights
+              {tr.hero.badge}
             </Badge>
           </div>
           <h1
@@ -232,23 +234,23 @@ const Hero = () => {
               textShadow: '0 2px 12px rgba(0,0,0,0.25)',
             }}
           >
-            Discover Your{" "}
-            <span className="bg-animated-gradient">Destiny</span>
+            {tr.hero.title1}{" "}
+            <span className="bg-animated-gradient">{tr.hero.title2}</span>
             <br />
-            Through{" "}
-            <span className="bg-animated-gradient">Ancient Wisdom</span>
+            {tr.hero.title3}{" "}
+            <span className="bg-animated-gradient">{tr.hero.title4}</span>
           </h1>
           <p
             ref={subtitleRef}
             className="text-sm sm:text-base md:text-lg text-gray-300 mb-6 sm:mb-8 mt-4 sm:mt-6 max-w-2xl mx-auto leading-relaxed px-2"
           >
-            Unlock your palm lines and birth chart secrets with advanced AI. Get personalized insights into your personality, relationships, and future.
+            {tr.hero.subtitle}
           </p>
           <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center items-center px-2">
             <Link to="/palm-analysis" className="w-full sm:w-auto">
               <Button className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-blue-600 text-white text-sm px-5 sm:px-6 py-2.5 sm:py-3 h-auto group shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-purple-500/30 touch-manipulation">
                 <Hand className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform" />
-                Analyze Your Palm
+                {tr.hero.analyzePalm}
                 <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -258,7 +260,7 @@ const Hero = () => {
                 className="w-full sm:w-auto border-purple-400/50 text-purple-300 hover:bg-purple-500/10 text-sm px-5 sm:px-6 py-2.5 sm:py-3 h-auto group hover:border-purple-400 touch-manipulation"
               >
                 <Stars className="h-4 w-4 mr-2 group-hover:rotate-180 transition-transform duration-700" />
-                Get Astrology Reading
+                {tr.hero.getAstrology}
               </Button>
             </Link>
           </div>
@@ -267,10 +269,10 @@ const Hero = () => {
             className="mt-8 sm:mt-12 grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6 max-w-3xl mx-auto px-2"
           >
             {[
-              { label: "Readings Completed", value: "10K+", color: "text-purple-400", bgGradient: "from-purple-500/20 to-purple-600/20", borderColor: "border-purple-400/30", hoverGlow: "hover:shadow-purple-500/30" },
-              { label: "Accuracy Rate", value: "98%", color: "text-blue-400", bgGradient: "from-blue-500/20 to-blue-600/20", borderColor: "border-blue-400/30", hoverGlow: "hover:shadow-blue-500/30" },
-              { label: "Happy Users", value: "5K+", color: "text-amber-400", bgGradient: "from-amber-500/20 to-amber-600/20", borderColor: "border-amber-400/30", hoverGlow: "hover:shadow-amber-500/30" },
-              { label: "AI Available", value: "24/7", color: "text-emerald-400", bgGradient: "from-emerald-500/20 to-emerald-600/20", borderColor: "border-emerald-400/30", hoverGlow: "hover:shadow-emerald-500/30" },
+              { label: tr.hero.stats.readings, value: "10K+", color: "text-purple-400", bgGradient: "from-purple-500/20 to-purple-600/20", borderColor: "border-purple-400/30", hoverGlow: "hover:shadow-purple-500/30" },
+              { label: tr.hero.stats.accuracy, value: "98%", color: "text-blue-400", bgGradient: "from-blue-500/20 to-blue-600/20", borderColor: "border-blue-400/30", hoverGlow: "hover:shadow-blue-500/30" },
+              { label: tr.hero.stats.users, value: "5K+", color: "text-amber-400", bgGradient: "from-amber-500/20 to-amber-600/20", borderColor: "border-amber-400/30", hoverGlow: "hover:shadow-amber-500/30" },
+              { label: tr.hero.stats.available, value: "24/7", color: "text-emerald-400", bgGradient: "from-emerald-500/20 to-emerald-600/20", borderColor: "border-emerald-400/30", hoverGlow: "hover:shadow-emerald-500/30" },
             ].map((stat, i) => (
               <div 
                 key={i} 

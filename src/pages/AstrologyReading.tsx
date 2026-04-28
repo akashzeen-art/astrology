@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ import { Link } from "react-router-dom";
 import { API_CONFIG, API_ENDPOINTS, STORAGE_KEYS } from "@/lib/config";
 const AstrologyReading = () => {
   // Authentication removed
+  const { language, tr } = useLanguage();
   const [currentStep, setCurrentStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
@@ -279,7 +281,7 @@ const AstrologyReading = () => {
         `${baseUrl}/astrology/generate-reading/`,
         {
           method: "POST",
-          body: JSON.stringify({ session_id: sessionId }),
+          body: JSON.stringify({ session_id: sessionId, language }),
         },
       );
       if (!genResp.ok) {
@@ -501,9 +503,9 @@ const AstrologyReading = () => {
   };
 
   const steps = [
-    { number: 1, title: "Personal Info", description: "Basic details" },
-    { number: 2, title: "Birth Details", description: "Date, time & place" },
-    { number: 3, title: "Preferences", description: "Reading focus" },
+    { number: 1, title: tr.astrology.steps.personalInfo, description: tr.astrology.steps.personalInfoDesc },
+    { number: 2, title: tr.astrology.steps.birthDetails, description: tr.astrology.steps.birthDetailsDesc },
+    { number: 3, title: tr.astrology.steps.preferences, description: tr.astrology.steps.preferencesDesc },
   ];
 
   if (analysisComplete && astrologyResults) {
@@ -527,7 +529,7 @@ const AstrologyReading = () => {
                   className="mb-3 sm:mb-4 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border-cosmic/50 text-cosmic bg-cosmic/10"
                 >
                   <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                  Reading Complete
+                  {tr.astrology.readingComplete}
                 </Badge>
                 <h1
                   className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 px-2"
@@ -540,7 +542,7 @@ const AstrologyReading = () => {
                   }}
                 >
                   Your{' '}
-                  <span style={{background: 'linear-gradient(90deg,#a78bfa,#fbbf24,#60a5fa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>Cosmic Blueprint</span>
+                  <span style={{background: 'linear-gradient(90deg,#a78bfa,#fbbf24,#60a5fa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>{tr.astrology.cosmicBlueprint}</span>
                 </h1>
                 <p
                   className="text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-4 sm:mb-6 px-2"
@@ -552,7 +554,7 @@ const AstrologyReading = () => {
                     lineHeight: 1.3,
                   }}
                 >
-                  Here's your personalized astrological analysis based on your birth chart
+                  {tr.astrology.cosmicBlueprintSubtitle}
                 </p>
               </div>
             </div>
@@ -563,10 +565,10 @@ const AstrologyReading = () => {
             <div className="container mx-auto px-3 sm:px-4">
               <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
                 <TabsList className="grid w-full grid-cols-4 glass-card p-0.5 sm:p-1 rounded-lg sm:rounded-xl overflow-x-auto">
-                  <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 touch-manipulation">Overview</TabsTrigger>
-                  <TabsTrigger value="personality" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 touch-manipulation">Personality</TabsTrigger>
-                  <TabsTrigger value="predictions" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 touch-manipulation">Predictions</TabsTrigger>
-                  <TabsTrigger value="compatibility" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 touch-manipulation">Compatibility</TabsTrigger>
+                  <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 touch-manipulation">{tr.astrology.overview}</TabsTrigger>
+                  <TabsTrigger value="personality" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 touch-manipulation">{tr.astrology.personality}</TabsTrigger>
+                  <TabsTrigger value="predictions" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 touch-manipulation">{tr.astrology.predictions}</TabsTrigger>
+                  <TabsTrigger value="compatibility" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 touch-manipulation">{tr.astrology.compatibility}</TabsTrigger>
                 </TabsList>
 
                 {/* Overview Tab */}
@@ -576,7 +578,7 @@ const AstrologyReading = () => {
                       <CardHeader className="pb-3">
                         <CardTitle className="flex items-center gap-2 text-base">
                           <Sparkles className="h-4 w-4 text-cosmic" />
-                          Your Cosmic Blueprint Summary
+                          {tr.astrology.cosmicSummary}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -591,12 +593,12 @@ const AstrologyReading = () => {
                     <Card className="glass-card stellar-glow hover:scale-105 transition-transform">
                       <CardContent className="p-4 sm:p-6 text-center">
                         <Sun className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-golden mx-auto mb-3 sm:mb-4 animate-glow" />
-                        <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">Sun Sign</h3>
+                        <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">{tr.astrology.sunSign}</h3>
                         <p className="text-xl sm:text-2xl cosmic-text font-bold">
                           {astrologyResults.sunSign}
                         </p>
                         <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 sm:mt-2">
-                          Your core identity and ego
+                          {tr.astrology.sunSignDesc}
                         </p>
                       </CardContent>
                     </Card>
@@ -604,12 +606,12 @@ const AstrologyReading = () => {
                     <Card className="glass-card stellar-glow hover:scale-105 transition-transform">
                       <CardContent className="p-4 sm:p-6 text-center">
                         <Moon className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-stellar mx-auto mb-3 sm:mb-4 animate-glow" />
-                        <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">Moon Sign</h3>
+                        <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">{tr.astrology.moonSign}</h3>
                         <p className="text-xl sm:text-2xl cosmic-text font-bold">
                           {astrologyResults.moonSign}
                         </p>
                         <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 sm:mt-2">
-                          Your emotional nature and instincts
+                          {tr.astrology.moonSignDesc}
                         </p>
                       </CardContent>
                     </Card>
@@ -617,12 +619,12 @@ const AstrologyReading = () => {
                     <Card className="glass-card stellar-glow hover:scale-105 transition-transform">
                       <CardContent className="p-4 sm:p-6 text-center">
                         <Globe className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-cosmic mx-auto mb-3 sm:mb-4 animate-glow" />
-                        <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">Rising Sign</h3>
+                        <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">{tr.astrology.risingSign}</h3>
                         <p className="text-xl sm:text-2xl cosmic-text font-bold">
                           {astrologyResults.risingSign}
                         </p>
                         <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 sm:mt-2">
-                          How others perceive you
+                          {tr.astrology.risingSignDesc}
                         </p>
                       </CardContent>
                     </Card>
@@ -638,7 +640,7 @@ const AstrologyReading = () => {
                           textShadow: '0 2px 8px rgba(0,0,0,0.18)',
                         }}
                       >
-                        <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400" /> Planetary Positions
+                        <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400" /> {tr.astrology.planetaryPositions}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -685,7 +687,7 @@ const AstrologyReading = () => {
                       <CardHeader className="pb-3">
                         <CardTitle className="flex items-center gap-2 text-base">
                           <Star className="h-4 w-4 text-cosmic" />
-                          Overview
+                          {tr.astrology.overview}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -700,7 +702,7 @@ const AstrologyReading = () => {
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2 text-base">
                         <Brain className="h-4 w-4 text-cosmic" />
-                        Personality Traits
+                        {tr.astrology.personalityTraits}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 sm:space-y-6">
@@ -732,7 +734,7 @@ const AstrologyReading = () => {
                       <CardHeader className="pb-3">
                         <CardTitle className="flex items-center gap-2 text-base">
                           <Shield className="h-4 w-4 text-green-400" />
-                          Strengths
+                          {tr.astrology.strengths}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4 sm:space-y-6">
@@ -759,7 +761,7 @@ const AstrologyReading = () => {
                       <CardHeader className="pb-3">
                         <CardTitle className="flex items-center gap-2 text-base">
                           <Eye className="h-4 w-4 text-yellow-400" />
-                          Areas for Growth
+                          {tr.astrology.areasForGrowth}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4 sm:space-y-6">
@@ -822,7 +824,7 @@ const AstrologyReading = () => {
                             <div className="space-y-1.5 sm:space-y-2">
                               <div className="flex justify-between text-xs sm:text-sm">
                                 <span className="text-muted-foreground">
-                                  Confidence:
+                                      {tr.astrology.confidence}:
                                 </span>
                                 <span className="font-medium text-cosmic">
                                   {prediction.confidence}%
@@ -846,10 +848,10 @@ const AstrologyReading = () => {
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2 text-base">
                         <Heart className="h-4 w-4 text-cosmic" />
-                        Love Compatibility
+                        {tr.astrology.loveCompatibility}
                       </CardTitle>
                       <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 sm:mt-2">
-                        Based on your Sun Sign ({astrologyResults.sunSign}), these signs show strong compatibility potential.
+                        Based on your Sun Sign ({astrologyResults.sunSign}), {tr.astrology.loveCompatibilityDesc}
                       </p>
                     </CardHeader>
                     <CardContent>
@@ -895,25 +897,25 @@ const AstrologyReading = () => {
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2 text-base">
                         <Globe className="h-4 w-4 text-cosmic" />
-                        Your Cosmic Triad
+                        {tr.astrology.cosmicTriad}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                         <div className="text-center p-3 sm:p-4 rounded-lg border border-border/50">
-                          <p className="text-xs sm:text-sm text-muted-foreground mb-0.5 sm:mb-1">Sun Sign</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground mb-0.5 sm:mb-1">{tr.astrology.sunSign}</p>
                           <p className="text-lg sm:text-xl font-bold cosmic-text">{astrologyResults.sunSign}</p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Core Identity</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">{tr.astrology.coreIdentity}</p>
                         </div>
                         <div className="text-center p-3 sm:p-4 rounded-lg border border-border/50">
-                          <p className="text-xs sm:text-sm text-muted-foreground mb-0.5 sm:mb-1">Moon Sign</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground mb-0.5 sm:mb-1">{tr.astrology.moonSign}</p>
                           <p className="text-lg sm:text-xl font-bold cosmic-text">{astrologyResults.moonSign}</p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Emotional Nature</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">{tr.astrology.emotionalNature}</p>
                         </div>
                         <div className="text-center p-3 sm:p-4 rounded-lg border border-border/50">
-                          <p className="text-xs sm:text-sm text-muted-foreground mb-0.5 sm:mb-1">Rising Sign</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground mb-0.5 sm:mb-1">{tr.astrology.risingSign}</p>
                           <p className="text-lg sm:text-xl font-bold cosmic-text">{astrologyResults.risingSign}</p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Outward Persona</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">{tr.astrology.outwardPersona}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -967,7 +969,7 @@ const AstrologyReading = () => {
                   size="sm"
                 >
                   <Star className="h-4 w-4 mr-1.5 sm:mr-2" />
-                  Save Reading
+                  {tr.astrology.saveReading}
                 </Button>
                 <Button
                   variant="outline"
@@ -975,7 +977,7 @@ const AstrologyReading = () => {
                   className="w-full sm:w-auto border-purple-400/50 text-purple-300 hover:bg-purple-500/20 bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl px-4 sm:px-6 py-2 sm:py-3 text-sm font-medium transition-all hover:scale-[1.02] touch-manipulation"
                 >
                   <Share2 className="h-4 w-4 mr-1.5 sm:mr-2" />
-                  Share Results
+                  {tr.astrology.shareResults}
                 </Button>
                 <Link to="/dashboard" className="w-full sm:w-auto">
                   <Button
@@ -984,7 +986,7 @@ const AstrologyReading = () => {
                     className="w-full sm:w-auto border-blue-400/50 text-blue-300 hover:bg-blue-500/20 bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl px-4 sm:px-6 py-2 sm:py-3 text-sm font-medium transition-all hover:scale-[1.02] touch-manipulation"
                   >
                     <Eye className="h-4 w-4 mr-1.5 sm:mr-2" />
-                    View Dashboard
+                    {tr.astrology.viewDashboard}
                   </Button>
                 </Link>
               </div>
@@ -1017,7 +1019,7 @@ const AstrologyReading = () => {
               className="border-purple-400/50 text-purple-300 hover:bg-purple-500/10 bg-white/10 rounded-lg px-4 py-2 text-sm font-medium"
             >
               <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
-                Back to Home
+              {tr.astrology.backHome}
             </Button>
               </Link>
         </div>
@@ -1031,7 +1033,7 @@ const AstrologyReading = () => {
                 className="mb-4 px-4 py-2 text-sm border-purple-400/50 text-purple-400 bg-purple-500/20 backdrop-blur-sm"
               >
                 <Star className="h-3.5 w-3.5 mr-1.5" />
-                Astrology Reading
+                {tr.astrology.badge}
               </Badge>
               <h1 className="text-2xl md:text-3xl font-bold mb-4 text-white">
                 Your{' '}
@@ -1046,7 +1048,7 @@ const AstrologyReading = () => {
                     animation: 'gradient-shift 5s ease infinite',
                   }}
                 >
-                  Cosmic Blueprint
+                  {tr.astrology.titleHighlight}
                 </span>
               </h1>
               <p className="text-sm text-gray-300 max-w-xl mx-auto">
@@ -1122,10 +1124,10 @@ const AstrologyReading = () => {
                     <div className="space-y-5">
                       <div className="text-center mb-6">
                         <h2 className="text-lg font-bold mb-2 text-white">
-                          Personal Information
+                          {tr.astrology.personalInfo}
                         </h2>
                         <p className="text-sm text-gray-300">
-                          Tell us about yourself to personalize your reading
+                          {tr.astrology.personalInfoSubtitle}
                         </p>
                       </div>
 
@@ -1135,7 +1137,7 @@ const AstrologyReading = () => {
                             htmlFor="name"
                             className="text-sm font-medium text-white mb-1.5 block"
                           >
-                            Full Name
+                            {tr.astrology.fullName}
                           </Label>
                           <Input
                             id="name"
@@ -1143,7 +1145,7 @@ const AstrologyReading = () => {
                             onChange={(e) =>
                               handleInputChange("name", e.target.value)
                             }
-                            placeholder="Enter your full name"
+                            placeholder={tr.astrology.fullNamePlaceholder}
                             className="bg-white/10 border-purple-400/30 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50 rounded-lg text-sm"
                           />
                         </div>
@@ -1153,7 +1155,7 @@ const AstrologyReading = () => {
                             htmlFor="gender"
                             className="text-sm font-medium text-white mb-1.5 block"
                           >
-                            Gender
+                            {tr.astrology.gender}
                           </Label>
                           <Select
                             value={birthData.gender}
@@ -1162,23 +1164,19 @@ const AstrologyReading = () => {
                             }
                           >
                             <SelectTrigger className="bg-white/10 border-purple-400/30 text-white focus:border-purple-400 focus:ring-purple-400/50 rounded-lg text-sm">
-                              <SelectValue placeholder="Select your gender" />
+                              <SelectValue placeholder={tr.astrology.genderPlaceholder} />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-purple-400/30">
-                              <SelectItem value="Male">Male</SelectItem>
-                              <SelectItem value="Female">Female</SelectItem>
-                              <SelectItem value="Non-Binary">
-                                Non-Binary
-                              </SelectItem>
-                              <SelectItem value="Prefer not to say">
-                                Prefer not to say
-                              </SelectItem>
+                              <SelectItem value="Male">{tr.astrology.male}</SelectItem>
+                              <SelectItem value="Female">{tr.astrology.female}</SelectItem>
+                              <SelectItem value="Non-Binary">{tr.astrology.nonBinary}</SelectItem>
+                              <SelectItem value="Prefer not to say">{tr.astrology.preferNotSay}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
 
                         <p className="text-xs text-gray-400 pt-1">
-                          By continuing, you consent to securely storing your birth details for this reading session.
+                          {tr.astrology.consentText}
                         </p>
                       </div>
                     </div>
@@ -1188,10 +1186,10 @@ const AstrologyReading = () => {
                     <div className="space-y-5">
                       <div className="text-center mb-6">
                         <h2 className="text-lg font-bold mb-2 text-white">
-                          Birth Details
+                          {tr.astrology.birthDetails}
                         </h2>
                         <p className="text-sm text-gray-300">
-                          Precise birth information for accurate chart calculation
+                          {tr.astrology.birthDetailsSubtitle}
                         </p>
                       </div>
 
@@ -1202,7 +1200,7 @@ const AstrologyReading = () => {
                             className="flex items-center gap-1.5 text-sm font-medium text-white mb-1.5"
                           >
                             <Calendar className="h-4 w-4 text-purple-300" />
-                            Birth Date
+                            {tr.astrology.birthDate}
                           </Label>
                           <Input
                             id="birthDate"
@@ -1221,7 +1219,7 @@ const AstrologyReading = () => {
                             className="flex items-center gap-1.5 text-sm font-medium text-white mb-1.5"
                           >
                             <Clock className="h-4 w-4 text-purple-300" />
-                            Birth Time
+                            {tr.astrology.birthTime}
                           </Label>
                           <Input
                             id="birthTime"
@@ -1233,7 +1231,7 @@ const AstrologyReading = () => {
                             className="bg-white/10 border-purple-400/30 text-white focus:border-purple-400 focus:ring-purple-400/50 rounded-lg text-sm"
                           />
                           <p className="text-xs text-gray-400 mt-1.5">
-                            Check your birth certificate for the exact time
+                            {tr.astrology.birthTimeHint}
                           </p>
                         </div>
 
@@ -1243,7 +1241,7 @@ const AstrologyReading = () => {
                             className="flex items-center gap-1.5 text-sm font-medium text-white mb-1.5"
                           >
                             <MapPin className="h-4 w-4 text-purple-300" />
-                            Birth Place
+                            {tr.astrology.birthPlace}
                           </Label>
                           <Input
                             id="birthPlace"
@@ -1251,7 +1249,7 @@ const AstrologyReading = () => {
                             onChange={(e) =>
                               handleInputChange("birthPlace", e.target.value)
                             }
-                            placeholder="City, State/Province, Country"
+                            placeholder={tr.astrology.birthPlacePlaceholder}
                             className="bg-white/10 border-purple-400/30 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50 rounded-lg text-sm"
                           />
                         </div>
@@ -1263,10 +1261,10 @@ const AstrologyReading = () => {
                     <div className="space-y-5">
                       <div className="text-center mb-6">
                         <h2 className="text-lg font-bold mb-2 text-white">
-                          Reading Focus
+                          {tr.astrology.readingFocus}
                         </h2>
                         <p className="text-sm text-gray-300">
-                          What aspects of your life would you like to explore?
+                          {tr.astrology.readingFocusSubtitle}
                         </p>
                       </div>
 
@@ -1274,7 +1272,7 @@ const AstrologyReading = () => {
                         {[
                           {
                             id: "love",
-                            label: "Love & Relationships",
+                            label: tr.astrology.love,
                             icon: Heart,
                             color: "from-pink-500/30 to-rose-500/30",
                             borderColor: "border-pink-400/50",
@@ -1282,7 +1280,7 @@ const AstrologyReading = () => {
                           },
                           {
                             id: "career",
-                            label: "Career & Finance",
+                            label: tr.astrology.career,
                             icon: TrendingUp,
                             color: "from-green-500/30 to-emerald-500/30",
                             borderColor: "border-green-400/50",
@@ -1290,7 +1288,7 @@ const AstrologyReading = () => {
                           },
                           {
                             id: "health",
-                            label: "Health & Wellness",
+                            label: tr.astrology.health,
                             icon: Shield,
                             color: "from-blue-500/30 to-cyan-500/30",
                             borderColor: "border-blue-400/50",
@@ -1298,7 +1296,7 @@ const AstrologyReading = () => {
                           },
                           {
                             id: "spiritual",
-                            label: "Spiritual Growth",
+                            label: tr.astrology.spiritual,
                             icon: Eye,
                             color: "from-purple-500/30 to-indigo-500/30",
                             borderColor: "border-purple-400/50",
@@ -1333,11 +1331,11 @@ const AstrologyReading = () => {
                           htmlFor="questions"
                           className="text-sm font-medium text-white mb-1.5 block"
                         >
-                          Specific Questions (Optional)
+                          {tr.astrology.specificQuestions}
                         </Label>
                         <Textarea
                           id="questions"
-                          placeholder="Any specific questions you'd like answered in your reading?"
+                          placeholder={tr.astrology.specificQuestionsPlaceholder}
                           rows={3}
                           value={birthData.questions}
                           onChange={(e) =>
@@ -1356,10 +1354,10 @@ const AstrologyReading = () => {
                       </div>
                       <div>
                         <h2 className="text-lg font-bold mb-2 text-white">
-                          Calculating Your Birth Chart
+                          {tr.astrology.calculating}
                         </h2>
                         <p className="text-sm text-gray-300 mb-4">
-                          Our AI is analyzing planetary positions and cosmic influences...
+                          {tr.astrology.calculatingSubtitle}
                         </p>
                         <div className="max-w-md mx-auto space-y-2">
                         <Progress
@@ -1373,16 +1371,16 @@ const AstrologyReading = () => {
                       </div>
                       <div className="text-xs text-gray-400 space-y-1">
                         {progress < 25 && (
-                          <p className="animate-pulse">Mapping celestial coordinates...</p>
+                          <p className="animate-pulse">{tr.astrology.mappingCoords}</p>
                         )}
                         {progress >= 25 && progress < 50 && (
-                          <p className="animate-pulse">Calculating planetary aspects...</p>
+                          <p className="animate-pulse">{tr.astrology.calculatingAspects}</p>
                         )}
                         {progress >= 50 && progress < 75 && (
-                          <p className="animate-pulse">Analyzing house positions...</p>
+                          <p className="animate-pulse">{tr.astrology.analyzingHouses}</p>
                         )}
                         {progress >= 75 && (
-                          <p className="animate-pulse">Generating personalized insights...</p>
+                          <p className="animate-pulse">{tr.astrology.generatingInsights}</p>
                         )}
                       </div>
                     </div>
@@ -1399,22 +1397,16 @@ const AstrologyReading = () => {
                         className="border-purple-400/50 text-purple-300 hover:bg-purple-500/20 bg-white/10 rounded-lg px-4 py-2 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
-                        Previous
+                        {tr.astrology.previous}
                       </Button>
                       <Button
                         onClick={handleNext}
                         className="bg-gradient-to-r from-purple-600 via-blue-600 to-amber-600 hover:from-purple-700 hover:via-blue-700 hover:to-amber-700 text-white shadow-lg shadow-purple-500/30 rounded-lg px-6 py-2 text-sm font-medium transition-all hover:scale-[1.02]"
                       >
                         {currentStep === 3 ? (
-                          <>
-                            <Sparkles className="h-4 w-4 mr-1.5" />
-                            Generate Reading
-                          </>
+                            <>{tr.astrology.generateReading}</>
                         ) : (
-                          <>
-                            Next
-                            <ArrowLeft className="h-3.5 w-3.5 ml-1.5 rotate-180" />
-                          </>
+                            <>{tr.astrology.next}</>
                         )}
                       </Button>
                     </div>
@@ -1432,7 +1424,7 @@ const AstrologyReading = () => {
             <div className="flex items-center justify-center gap-2">
               <Shield className="h-4 w-4 text-emerald-400" />
               <p className="text-xs text-gray-400">
-              Your birth data is encrypted and secure. We never share personal information.
+              {tr.astrology.securityNote}
             </p>
             </div>
           </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import PalmUpload from "@/components/PalmUpload";
 import PalmResults from "@/components/PalmResults";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ import { useReadings } from "@/contexts/ReadingsContext";
 import type { PalmReading } from "@/lib/apiService";
 
 const PalmAnalysis = () => {
-  // Authentication removed
+  const { tr } = useLanguage();
   const [showResults, setShowResults] = useState(false);
   const { currentReading } = useReadings();
   const pageRef = useRef<HTMLDivElement>(null);
@@ -147,7 +148,7 @@ const PalmAnalysis = () => {
               className="border-purple-400/30 text-purple-300 hover:bg-purple-500/10 bg-white/5 backdrop-blur-md text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 touch-manipulation"
             >
               <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
-              Back to Home
+              {tr.palm.backHome}
             </Button>
           </Link>
         </div>
@@ -160,16 +161,16 @@ const PalmAnalysis = () => {
               className="mb-3 sm:mb-4 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border-purple-500/50 text-purple-300 bg-purple-500/10"
             >
               <Hand className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-              AI Palm Reading
+              {tr.palm.badge}
             </Badge>
             <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 text-white px-2">
-              Discover Your{' '}
+              {tr.palm.title}{' '}
               <span className="bg-gradient-to-r from-purple-400 via-amber-400 to-blue-400 bg-clip-text text-transparent">
-                Life Lines
+                {tr.palm.titleHighlight}
               </span>
             </h1>
             <p className="text-xs sm:text-sm md:text-base text-gray-300 leading-relaxed max-w-xl mx-auto px-2">
-              Upload a photo of your palm and let our advanced AI analyze your life lines, personality traits, and future predictions.
+              {tr.palm.subtitle}
             </p>
           </div>
         </header>
@@ -189,36 +190,36 @@ const PalmAnalysis = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-white text-base">
                     <Brain className="h-4 w-4 text-purple-400" />
-                    What We Analyze
+                    {tr.palm.whatWeAnalyze}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-0">
                   <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-purple-500/10 transition-colors">
                     <div className="w-2 h-2 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></div>
                     <div>
-                      <h4 className="font-medium text-white text-sm">Life Line</h4>
-                      <p className="text-xs text-gray-400">Vitality, health, and major life changes</p>
+                      <h4 className="font-medium text-white text-sm">{tr.palm.lifeLine}</h4>
+                      <p className="text-xs text-gray-400">{tr.palm.lifeLineDesc}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-500/10 transition-colors">
                     <div className="w-2 h-2 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
                     <div>
-                      <h4 className="font-medium text-white text-sm">Head Line</h4>
-                      <p className="text-xs text-gray-400">Intelligence, communication, and mental approach</p>
+                      <h4 className="font-medium text-white text-sm">{tr.palm.headLine}</h4>
+                      <p className="text-xs text-gray-400">{tr.palm.headLineDesc}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-amber-500/10 transition-colors">
                     <div className="w-2 h-2 bg-amber-400 rounded-full mt-1.5 flex-shrink-0"></div>
                     <div>
-                      <h4 className="font-medium text-white text-sm">Heart Line</h4>
-                      <p className="text-xs text-gray-400">Emotions, relationships, and romantic nature</p>
+                      <h4 className="font-medium text-white text-sm">{tr.palm.heartLine}</h4>
+                      <p className="text-xs text-gray-400">{tr.palm.heartLineDesc}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-emerald-500/10 transition-colors">
                     <div className="w-2 h-2 bg-emerald-400 rounded-full mt-1.5 flex-shrink-0"></div>
                     <div>
-                      <h4 className="font-medium text-white text-sm">Fate Line</h4>
-                      <p className="text-xs text-gray-400">Career path, destiny, and life direction</p>
+                      <h4 className="font-medium text-white text-sm">{tr.palm.fateLine}</h4>
+                      <p className="text-xs text-gray-400">{tr.palm.fateLineDesc}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -229,13 +230,13 @@ const PalmAnalysis = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-white text-base">
                     <Star className="h-4 w-4 text-amber-400" />
-                    AI Accuracy
+                    {tr.palm.aiAccuracy}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-2 rounded-lg hover:bg-amber-500/10 transition-colors">
-                      <span className="text-xs text-gray-400">Line Detection</span>
+                      <span className="text-xs text-gray-400">{tr.palm.lineDetection}</span>
                       <span className="font-semibold text-lg text-amber-400">
                         {(() => {
                           const reading = currentReading as PalmReading | null;
@@ -246,7 +247,7 @@ const PalmAnalysis = () => {
                       </span>
                     </div>
                     <div className="flex items-center justify-between p-2 rounded-lg hover:bg-purple-500/10 transition-colors">
-                      <span className="text-xs text-gray-400">Pattern Analysis</span>
+                      <span className="text-xs text-gray-400">{tr.palm.patternAnalysis}</span>
                       <span className="font-semibold text-lg text-purple-400">
                         {(() => {
                           const reading = currentReading as PalmReading | null;
@@ -257,7 +258,7 @@ const PalmAnalysis = () => {
                       </span>
                     </div>
                     <div className="flex items-center justify-between p-2 rounded-lg hover:bg-blue-500/10 transition-colors">
-                      <span className="text-xs text-gray-400">Interpretation</span>
+                      <span className="text-xs text-gray-400">{tr.palm.interpretation}</span>
                       <span className="font-semibold text-lg text-blue-400">
                         {(() => {
                           const reading = currentReading as PalmReading | null;
@@ -279,25 +280,25 @@ const PalmAnalysis = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-white text-base">
                     <Sparkles className="h-4 w-4 text-pink-400" />
-                    Reading Features
+                    {tr.palm.readingFeatures}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 pt-0">
                   <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-red-500/10 transition-colors">
                     <Heart className="h-4 w-4 text-red-400" />
-                    <span className="text-sm text-gray-300">Love & Relationships</span>
+                    <span className="text-sm text-gray-300">{tr.palm.love}</span>
                   </div>
                   <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-green-500/10 transition-colors">
                     <TrendingUp className="h-4 w-4 text-green-400" />
-                    <span className="text-sm text-gray-300">Career & Success</span>
+                    <span className="text-sm text-gray-300">{tr.palm.career}</span>
                   </div>
                   <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-500/10 transition-colors">
                     <Clock className="h-4 w-4 text-blue-400" />
-                    <span className="text-sm text-gray-300">Life Timeline</span>
+                    <span className="text-sm text-gray-300">{tr.palm.lifeTimeline}</span>
                   </div>
                   <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-purple-500/10 transition-colors">
                     <Brain className="h-4 w-4 text-purple-400" />
-                    <span className="text-sm text-gray-300">Personality Traits</span>
+                    <span className="text-sm text-gray-300">{tr.palm.personality}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -309,13 +310,13 @@ const PalmAnalysis = () => {
         <footer className="border-t border-white/10 py-8 mt-8">
           <div className="container mx-auto px-4 text-center">
             <p className="text-sm text-gray-400">
-              Need help? Check our{" "}
+              {tr.palm.faqText}{" "}
               <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors">FAQ</a>
               {" "}or{" "}
-              <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors">contact support</a>
+              <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors">{tr.palm.contactSupport}</a>
             </p>
             <p className="text-xs text-gray-500 mt-2">
-              Your privacy is our priority. All images are processed securely.
+              {tr.palm.privacyNote}
             </p>
           </div>
         </footer>

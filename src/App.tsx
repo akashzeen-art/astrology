@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ReadingsProvider } from "@/contexts/ReadingsContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 // ProtectedRoute removed - authentication disabled
 import Index from "./pages/Index";
@@ -37,6 +38,7 @@ const App = () => (
     <LoadingOverlay />
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
+        <LanguageProvider>
         <AuthProvider>
           <ReadingsProvider>
             <TooltipProvider>
@@ -60,6 +62,7 @@ const App = () => (
             </TooltipProvider>
           </ReadingsProvider>
         </AuthProvider>
+        </LanguageProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   </>

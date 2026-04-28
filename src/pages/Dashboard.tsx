@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ import {
 } from "@/lib/shareAndDownload";
 
 const Dashboard = () => {
+  const { tr } = useLanguage();
   // Authentication removed - using default values
   const authUser = null;
   const { toast } = useToast();
@@ -478,7 +480,7 @@ const Dashboard = () => {
                     <div className="flex items-center gap-2 mt-2">
                       <div className="h-2 w-2 bg-purple-300 rounded-full animate-pulse"></div>
                       <p className="text-xs text-purple-300 animate-pulse">
-                        {isLoadingDashboard ? "Updating your cosmic activity..." : "Loading your latest cosmic activity..."}
+                        {isLoadingDashboard ? tr.dashboard.loading : tr.dashboard.loading}
                       </p>
               </div>
                   )}
@@ -490,7 +492,7 @@ const Dashboard = () => {
                       {isUpdating ? (
                         <>
                           <div className="h-1.5 w-1.5 bg-purple-300 rounded-full animate-pulse"></div>
-                          <p className="text-xs text-purple-300">Updating...</p>
+                          <p className="text-xs text-purple-300">{tr.dashboard.updating}</p>
                         </>
                       ) : (
                         <>
@@ -517,7 +519,7 @@ const Dashboard = () => {
                   className="border-purple-400/50 text-purple-300 hover:bg-purple-500/20 bg-white/10 rounded-lg px-4 py-2 text-sm font-medium"
                 >
                   <Settings className="h-3.5 w-3.5 mr-1.5" />
-                  Settings
+                  {tr.dashboard.settings}
                 </Button>
                 <Link to="/palm-analysis" className="w-full sm:w-auto">
                   <Button
@@ -525,7 +527,7 @@ const Dashboard = () => {
                     className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/30 rounded-lg px-4 py-2 text-sm font-medium w-full sm:w-auto"
                   >
                     <Hand className="h-3.5 w-3.5 mr-1.5" />
-                    New Reading
+                    {tr.dashboard.newReading}
                   </Button>
                 </Link>
               </div>
@@ -550,7 +552,7 @@ const Dashboard = () => {
                   <div className="flex items-center justify-between relative z-10">
                     <div>
                       <p className="text-xs text-gray-400 mb-1.5 font-medium">
-                        Total Readings
+                        {tr.dashboard.totalReadings}
                       </p>
                       <p 
                         className="text-2xl font-bold"
@@ -577,7 +579,7 @@ const Dashboard = () => {
                   <div className="flex items-center justify-between relative z-10">
                     <div>
                       <p className="text-xs text-gray-400 mb-1.5 font-medium">
-                        Accuracy Rate
+                        {tr.dashboard.accuracyRate}
                       </p>
                       <p 
                         className="text-2xl font-bold"
@@ -604,7 +606,7 @@ const Dashboard = () => {
                   <div className="flex items-center justify-between relative z-10">
                     <div>
                       <p className="text-xs text-gray-400 mb-1.5 font-medium">
-                        This Week
+                        {tr.dashboard.thisWeek}
                       </p>
                       <p 
                         className="text-2xl font-bold"
@@ -631,7 +633,7 @@ const Dashboard = () => {
                   <div className="flex items-center justify-between relative z-10">
                     <div>
                       <p className="text-xs text-gray-400 mb-1.5 font-medium">
-                        Current Plan
+                        {tr.dashboard.currentPlan}
                       </p>
                       <p 
                         className="text-lg font-bold"
@@ -692,7 +694,7 @@ const Dashboard = () => {
                         <div className="p-1.5 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-md">
                           <BarChart className="h-4 w-4 text-purple-300" />
                         </div>
-                        Weekly Activity
+                        {tr.dashboard.weeklyActivity}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -749,7 +751,7 @@ const Dashboard = () => {
                         <div className="p-1.5 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-md">
                           <Eye className="h-4 w-4 text-purple-300" />
                         </div>
-                        Spiritual Progress
+                        {tr.dashboard.spiritualProgress}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -786,7 +788,7 @@ const Dashboard = () => {
                       <div className="p-1.5 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-md">
                         <Clock className="h-4 w-4 text-purple-300" />
                       </div>
-                      Recent Activity
+                      {tr.dashboard.recentActivity}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -818,7 +820,7 @@ const Dashboard = () => {
                       ) : (
                         <div className="text-center py-6 text-gray-400">
                           <Hand className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">No readings yet. Start your first reading!</p>
+                          <p className="text-sm">{tr.dashboard.noReadings}. {tr.dashboard.startFirstReading}!</p>
                         </div>
                       )}
                     </div>
@@ -923,7 +925,7 @@ const Dashboard = () => {
                             size="sm"
                         >
                           <Eye className="h-3.5 w-3.5 mr-1.5" />
-                          View Details
+                          {tr.dashboard.viewDetails}
                         </Button>
                       </CardContent>
                     </Card>
@@ -934,7 +936,7 @@ const Dashboard = () => {
                     <CardContent className="p-8 text-center">
                       <Hand className="h-12 w-12 text-purple-300 mx-auto mb-3 opacity-50" />
                       <h3 className="text-lg font-semibold text-white mb-2">
-                        No Readings Yet
+                          {tr.dashboard.noReadings}
                       </h3>
                       <p className="text-sm text-gray-400 mb-5">
                         Start your first reading to see your results here
@@ -959,7 +961,7 @@ const Dashboard = () => {
                         <div className="p-1.5 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-md">
                           <TrendingUp className="h-4 w-4 text-purple-300" />
                         </div>
-                        Accuracy Trend
+                        {tr.dashboard.accuracyTrend}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -1027,7 +1029,7 @@ const Dashboard = () => {
                         <div className="p-1.5 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-md">
                           <Brain className="h-4 w-4 text-purple-300" />
                         </div>
-                        Spiritual Development
+                        {tr.dashboard.spiritualDevelopment}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -1118,17 +1120,15 @@ const Dashboard = () => {
                       <CardContent className="p-8 text-center">
                         <Star className="h-12 w-12 text-purple-300 mx-auto mb-3 opacity-50" />
                         <h3 className="text-lg font-semibold text-white mb-2">
-                          No Predictions Yet
+                          {tr.dashboard.noPredictions}
                         </h3>
                         <p className="text-sm text-gray-400 mb-5">
-                          {hasEnoughReadingData 
-                            ? "Complete more readings to receive personalized predictions"
-                            : "Complete readings to receive personalized predictions"}
+                          {tr.dashboard.noPredictionsDesc}
                         </p>
                         <Link to="/palm-analysis">
                           <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/30 rounded-lg px-5 py-2.5 text-sm font-medium transition-all hover:scale-[1.02]">
                             <Hand className="h-3.5 w-3.5 mr-1.5" />
-                            {hasEnoughReadingData ? "Start Another Reading" : "Start Your First Reading"}
+                            {hasEnoughReadingData ? tr.dashboard.startAnotherReading : tr.dashboard.startFirstReading}
                           </Button>
                         </Link>
                       </CardContent>
@@ -1142,7 +1142,7 @@ const Dashboard = () => {
                             <Bell className="h-8 w-8 text-amber-300" />
                           </div>
                           <h3 className="text-lg font-bold text-white mb-2">
-                            Unlock Advanced Predictions
+                            {tr.dashboard.upgradeTitle}
                           </h3>
                           <p className="text-sm text-gray-300 mb-5 max-w-md mx-auto">
                             {!hasEnoughReadingData 
@@ -1227,11 +1227,8 @@ const Dashboard = () => {
               <Shield className="h-4 w-4 text-purple-300" />
               <p className="text-xs text-gray-400">
               Questions about your readings?{" "}
-                <a 
-                  href="#" 
-                  className="text-purple-300 hover:text-purple-200 hover:underline transition-colors duration-300"
-                >
-                Contact our spiritual advisors
+                <a href="#" className="text-purple-300 hover:text-purple-200 hover:underline transition-colors duration-300">
+                {tr.dashboard.contactAdvisors}
               </a>
             </p>
             </div>

@@ -1,5 +1,6 @@
 
 import React, { useRef, useEffect, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -395,113 +396,30 @@ const AnimatedStatSVG = ({
 };
 
 const Features = () => {
+  const { tr } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState("numerology");
 
   const numerologyFeatures = [
-    {
-      icon: Calculator,
-      title: "Life Path Calculator",
-      description:
-        "Discover your life path number and unlock your destiny through advanced numerological calculations.",
-      color: "cosmic",
-      badge: "Core Numbers",
-    },
-    {
-      icon: Target,
-      title: "Destiny Analysis",
-      description:
-        "Uncover your life purpose and future opportunities through personalized numerological insights.",
-      color: "stellar",
-      badge: "Destiny",
-    },
-    {
-      icon: Sparkles,
-      title: "Soul Number Reading",
-      description:
-        "Explore your inner desires and spiritual motivations through detailed soul number analysis.",
-      color: "golden",
-      badge: "Spiritual",
-    },
-    {
-      icon: Brain,
-      title: "AI Numerology Engine",
-      description:
-        "Advanced AI algorithms analyze numerical patterns with unprecedented accuracy and depth.",
-      color: "mystic",
-      badge: "AI-Powered",
-    },
+    { icon: Calculator, title: tr.features.numerology.lifePathTitle, description: tr.features.numerology.lifePathDesc, color: "cosmic", badge: "Core Numbers" },
+    { icon: Target, title: tr.features.numerology.destinyTitle, description: tr.features.numerology.destinyDesc, color: "stellar", badge: "Destiny" },
+    { icon: Sparkles, title: tr.features.numerology.soulTitle, description: tr.features.numerology.soulDesc, color: "golden", badge: "Spiritual" },
+    { icon: Brain, title: tr.features.numerology.aiTitle, description: tr.features.numerology.aiDesc, color: "mystic", badge: "AI-Powered" },
   ];
 
   const horoscopeFeatures = [
-    {
-      icon: Star,
-      title: "Daily Horoscopes",
-      description:
-        "Personalized daily insights and cosmic guidance tailored to your unique zodiac profile.",
-      color: "cosmic",
-      badge: "Daily",
-    },
-    {
-      icon: Calendar,
-      title: "Birth Chart Analysis",
-      description:
-        "Comprehensive astrological readings based on your exact birth time, date, and location.",
-      color: "stellar",
-      badge: "Personalized",
-    },
-    {
-      icon: Heart,
-      title: "Love Compatibility",
-      description:
-        "Discover relationship insights, romantic compatibility, and soulmate connections.",
-      color: "golden",
-      badge: "Romance",
-    },
-    {
-      icon: TrendingUp,
-      title: "Future Forecasts",
-      description:
-        "Detailed weekly and monthly predictions covering career, love, health, and finances.",
-      color: "mystic",
-      badge: "Forecasting",
-    },
+    { icon: Star, title: tr.features.horoscope.dailyTitle, description: tr.features.horoscope.dailyDesc, color: "cosmic", badge: "Daily" },
+    { icon: Calendar, title: tr.features.horoscope.birthChartTitle, description: tr.features.horoscope.birthChartDesc, color: "stellar", badge: "Personalized" },
+    { icon: Heart, title: tr.features.horoscope.loveTitle, description: tr.features.horoscope.loveDesc, color: "golden", badge: "Romance" },
+    { icon: TrendingUp, title: tr.features.horoscope.forecastTitle, description: tr.features.horoscope.forecastDesc, color: "mystic", badge: "Forecasting" },
   ];
 
   const astrologyFeatures = [
-    {
-      icon: Moon,
-      title: "Lunar Cycle Guidance",
-      description:
-        "Harness moon phases and lunar cycles for optimal timing in personal and spiritual growth.",
-      color: "cosmic",
-      badge: "Lunar",
-    },
-    {
-      icon: Eye,
-      title: "Spiritual Awakening",
-      description:
-        "Connect with your higher purpose and receive divine guidance for your spiritual journey.",
-      color: "stellar",
-      badge: "Wisdom",
-    },
-    {
-      icon: Hash,
-      title: "Planetary Transits",
-      description:
-        "Track planetary movements and their influence on your personal chart and life events.",
-      color: "golden",
-      badge: "Live Updates",
-    },
-    {
-      icon: Shield,
-      title: "Protected Readings",
-      description:
-        "Your personal astrological data is encrypted and protected with enterprise-grade security.",
-      color: "mystic",
-      badge: "Secure",
-    },
+    { icon: Moon, title: tr.features.astrology.lunarTitle, description: tr.features.astrology.lunarDesc, color: "cosmic", badge: "Lunar" },
+    { icon: Eye, title: tr.features.astrology.spiritualTitle, description: tr.features.astrology.spiritualDesc, color: "stellar", badge: "Wisdom" },
+    { icon: Hash, title: tr.features.astrology.planetaryTitle, description: tr.features.astrology.planetaryDesc, color: "golden", badge: "Live Updates" },
+    { icon: Shield, title: tr.features.astrology.protectedTitle, description: tr.features.astrology.protectedDesc, color: "mystic", badge: "Secure" },
   ];
 
   useEffect(() => {
@@ -668,22 +586,17 @@ const Features = () => {
       <div className="container mx-auto px-3 sm:px-4 relative z-10">
         {/* Section header with enhanced animations */}
         <div className="text-center mb-8 sm:mb-12">
-          <Badge
-            variant="outline"
-            className="header-animate mb-3 sm:mb-4 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border-purple-500/50 text-purple-300 bg-purple-500/10"
-          >
-            ✨ Platform Features
+          <Badge variant="outline" className="header-animate mb-3 sm:mb-4 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border-purple-500/50 text-purple-300 bg-purple-500/10">
+            {tr.features.badge}
           </Badge>
-          <h2
-            className="header-animate mb-3 sm:mb-4 text-xl sm:text-2xl md:text-3xl font-bold text-white px-2"
-          >
-            Powered by{' '}
+          <h2 className="header-animate mb-3 sm:mb-4 text-xl sm:text-2xl md:text-3xl font-bold text-white px-2">
+            {tr.features.title}{' '}
             <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-amber-400 bg-clip-text text-transparent">
-              Advanced AI
+              {tr.features.titleHighlight}
             </span>
           </h2>
           <p className="header-animate max-w-2xl mx-auto text-xs sm:text-sm md:text-base text-gray-300 leading-relaxed px-2">
-            Experience the perfect blend of ancient wisdom and cutting-edge technology. Our AI analyzes thousands of patterns to provide accurate, personalized insights.
+            {tr.features.subtitle}
           </p>
         </div>
 
@@ -694,32 +607,17 @@ const Features = () => {
               ref={tabsRef}
               className="flex w-full max-w-xl p-1 sm:p-2 justify-between gap-1 sm:gap-2 bg-slate-900/50 backdrop-blur-md border border-purple-500/20 rounded-lg sm:rounded-xl"
             >
-              {/* Numerology Tab */}
-              <TabsTrigger
-                value="numerology"
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md sm:rounded-lg transition-all duration-300 text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:text-white touch-manipulation"
-              >
+              <TabsTrigger value="numerology" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md sm:rounded-lg transition-all duration-300 text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:text-white touch-manipulation">
                 <Calculator className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">Numerology</span>
-                <span className="xs:hidden">Num</span>
+                <span>{tr.features.tabs.numerology}</span>
               </TabsTrigger>
-              {/* Horoscope Tab */}
-              <TabsTrigger
-                value="horoscope"
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md sm:rounded-lg transition-all duration-300 text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-amber-400 data-[state=active]:text-white data-[state=active]:shadow-lg hover:text-white touch-manipulation"
-              >
+              <TabsTrigger value="horoscope" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md sm:rounded-lg transition-all duration-300 text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-amber-400 data-[state=active]:text-white data-[state=active]:shadow-lg hover:text-white touch-manipulation">
                 <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">Horoscope</span>
-                <span className="xs:hidden">Horo</span>
+                <span>{tr.features.tabs.horoscope}</span>
               </TabsTrigger>
-              {/* Astrology Tab */}
-              <TabsTrigger
-                value="astrology"
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md sm:rounded-lg transition-all duration-300 text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:text-white touch-manipulation"
-              >
+              <TabsTrigger value="astrology" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md sm:rounded-lg transition-all duration-300 text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:text-white touch-manipulation">
                 <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">Astrology</span>
-                <span className="xs:hidden">Astro</span>
+                <span>{tr.features.tabs.astrology}</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -740,10 +638,10 @@ const Features = () => {
         {/* Stats section */}
         <div className="mt-10 sm:mt-16 grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 max-w-3xl mx-auto">
           {[
-            { value: "50K+", label: "Readings Completed" },
-            { value: "99%", label: "Accuracy Rate" },
-            { value: "24/7", label: "Always Available" },
-            { value: "5★", label: "User Rating" },
+            { value: "50K+", label: tr.features.stats.readings },
+            { value: "99%", label: tr.features.stats.accuracy },
+            { value: "24/7", label: tr.features.stats.available },
+            { value: "5★", label: tr.features.stats.rating },
           ].map((stat, i) => (
             <div key={i} className="text-center p-3 sm:p-4 rounded-lg sm:rounded-xl bg-slate-900/50 border border-purple-500/20">
               <div className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-0.5 sm:mb-1">

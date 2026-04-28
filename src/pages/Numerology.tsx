@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -185,6 +186,7 @@ const ThreeBackground = () => {
 };
 
 const Numerology = () => {
+  const { tr } = useLanguage();
   const { toast } = useToast();
   // Authentication removed
   const [birthDate, setBirthDate] = useState("");
@@ -790,13 +792,13 @@ const Numerology = () => {
               animation: 'gradient-shift 5s ease infinite',
             }}
           >
-            Sacred Numbers
+            {tr.numerology.titleHighlight}
           </span>
         </h1>
         <p
           className="text-sm md:text-base max-w-2xl mx-auto mb-6 leading-relaxed text-gray-300"
         >
-          Unlock the ancient wisdom of numbers and discover your life path, destiny, and soul purpose through the mystical science of numerology.
+          {tr.numerology.subtitle} and discover your life path, destiny, and soul purpose through the mystical science of numerology.
         </p>
         <style>{`
           @keyframes gradient-shift {
@@ -818,10 +820,10 @@ const Numerology = () => {
                       <div className="p-2 rounded-lg bg-purple-500/20 border border-purple-400/30">
                         <Calculator className="w-4 h-4 text-purple-300" />
                       </div>
-                      Sacred Number Calculator
+                      {tr.numerology.calculatorTitle}
                     </CardTitle>
                     <p className="text-sm text-gray-300">
-                      Enter your details to reveal your numerological blueprint
+                      {tr.numerology.calculatorSubtitle}
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-5">
@@ -830,19 +832,19 @@ const Numerology = () => {
                         htmlFor="fullName"
                         className="text-sm font-medium text-white mb-2 block"
                       >
-                        Full Birth Name
+                        {tr.numerology.fullName}
                       </Label>
                       <Input
                         id="fullName"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        placeholder="Enter your complete birth name"
+                        placeholder={tr.numerology.fullNamePlaceholder}
                         className="text-sm bg-white/10 border-purple-400/30 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50 rounded-lg"
                         autoComplete="name"
                         autoCapitalize="words"
                       />
                       <p className="text-xs text-gray-400 mt-1.5">
-                        Use the name exactly as it appears on your birth certificate
+                        {tr.numerology.fullNameHint}
                       </p>
                     </div>
 
@@ -851,7 +853,7 @@ const Numerology = () => {
                         htmlFor="birthDate"
                         className="text-sm font-medium text-white mb-2 block"
                       >
-                        Birth Date
+                        {tr.numerology.birthDate}
                       </Label>
                       <Input
                         id="birthDate"
@@ -868,7 +870,7 @@ const Numerology = () => {
                         <div className="flex items-center gap-2 text-purple-300">
                           <Sparkles className="w-4 h-4 animate-spin flex-shrink-0" />
                           <span className="font-medium text-sm">
-                            Calculating your sacred numbers...
+                            {tr.numerology.calculating}
                           </span>
                         </div>
                         <Progress value={calculationProgress} className="h-2" />
@@ -881,7 +883,7 @@ const Numerology = () => {
                       className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-amber-600 hover:from-purple-700 hover:via-blue-700 hover:to-amber-700 text-white text-sm py-3 rounded-xl shadow-lg shadow-purple-500/30 transform hover:scale-[1.02] active:scale-95 transition-all duration-300 font-medium"
                     >
                       <Sparkles className="w-4 h-4 mr-2" />
-                        {isCalculating ? "Calculating..." : "Reveal My Numbers"}
+                        {isCalculating ? tr.numerology.calculating : tr.numerology.revealNumbers}
                     </Button>
                   </CardContent>
                 </Card>
@@ -899,7 +901,7 @@ const Numerology = () => {
                       <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-400/30">
                         <Eye className="w-4 h-4 text-blue-300" />
                       </div>
-                      Number Meanings
+                      {tr.numerology.numberMeanings}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -914,17 +916,7 @@ const Numerology = () => {
                           </div>
                           <p className="text-xs font-medium text-white">
                             {
-                              [
-                                "Leader",
-                                "Diplomat",
-                                "Creator",
-                                "Builder",
-                                "Explorer",
-                                "Nurturer",
-                                "Seeker",
-                                "Achiever",
-                                "Humanitarian",
-                              ][num - 1]
+                              tr.numerology.numberLabels[num - 1]
                             }
                           </p>
                         </div>
@@ -940,39 +932,39 @@ const Numerology = () => {
                       <div className="p-2 rounded-lg bg-purple-500/20 border border-purple-400/30">
                         <Brain className="w-4 h-4 text-purple-300" />
                       </div>
-                      Your Complete Profile
+                      {tr.numerology.completeProfile}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {[
                       {
                         icon: Target,
-                        title: "Life Path Number",
-                        desc: "Your main life journey and purpose",
+                        title: tr.numerology.lifePathNumber,
+                        desc: tr.numerology.lifePathDesc,
                         color: "from-purple-500/30 to-purple-600/30",
                         borderColor: "border-purple-400/30",
                         iconColor: "text-purple-300",
                       },
                       {
                         icon: Crown,
-                        title: "Destiny Number",
-                        desc: "Your life mission and ultimate goal",
+                        title: tr.numerology.destinyNumber,
+                        desc: tr.numerology.destinyDesc,
                         color: "from-blue-500/30 to-blue-600/30",
                         borderColor: "border-blue-400/30",
                         iconColor: "text-blue-300",
                       },
                       {
                         icon: Heart,
-                        title: "Soul Number",
-                        desc: "Your inner desires and motivations",
+                        title: tr.numerology.soulNumber,
+                        desc: tr.numerology.soulDesc,
                         color: "from-pink-500/30 to-pink-600/30",
                         borderColor: "border-pink-400/30",
                         iconColor: "text-pink-300",
                       },
                       {
                         icon: Users,
-                        title: "Personality Number",
-                        desc: "How others perceive you",
+                        title: tr.numerology.personalityNumber,
+                        desc: tr.numerology.personalityDesc,
                         color: "from-green-500/30 to-green-600/30",
                         borderColor: "border-green-400/30",
                         iconColor: "text-green-300",
@@ -1007,7 +999,7 @@ const Numerology = () => {
                       <div className="p-2 rounded-lg bg-amber-500/20 border border-amber-400/30">
                         <BookOpen className="w-4 h-4 text-amber-300" />
                       </div>
-                      Ancient Wisdom
+                      {tr.numerology.ancientWisdom}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
@@ -1016,7 +1008,7 @@ const Numerology = () => {
                         <Star className="w-3.5 h-3.5 text-amber-300" />
                       </div>
                       <span className="text-xs text-gray-300">
-                        Numerology dates back over 4,000 years
+                        {tr.numerology.wisdom1}
                       </span>
                     </div>
                     <div className="group flex items-center gap-3 p-2 rounded-lg hover:bg-purple-500/10 transition-all duration-300">
@@ -1024,7 +1016,7 @@ const Numerology = () => {
                         <Infinity className="w-3.5 h-3.5 text-purple-300" />
                       </div>
                       <span className="text-xs text-gray-300">
-                        Pythagoras developed modern numerological systems
+                        {tr.numerology.wisdom2}
                       </span>
                     </div>
                     <div className="group flex items-center gap-3 p-2 rounded-lg hover:bg-blue-500/10 transition-all duration-300">
@@ -1032,7 +1024,7 @@ const Numerology = () => {
                         <Lightbulb className="w-3.5 h-3.5 text-blue-300" />
                       </div>
                       <span className="text-xs text-gray-300">
-                        Numbers reveal personality patterns and life themes
+                        {tr.numerology.wisdom3}
                       </span>
                     </div>
                     <div className="group flex items-center gap-3 p-2 rounded-lg hover:bg-green-500/10 transition-all duration-300">
@@ -1040,7 +1032,7 @@ const Numerology = () => {
                         <TrendingUp className="w-3.5 h-3.5 text-green-300" />
                       </div>
                       <span className="text-xs text-gray-300">
-                        Used for guidance in major life decisions
+                        {tr.numerology.wisdom4}
                       </span>
                     </div>
                   </CardContent>
@@ -1053,7 +1045,7 @@ const Numerology = () => {
               {/* Main Results Header */}
               <div className="text-center mb-6 px-4">
                 <h2 className="text-xl sm:text-2xl font-bold mb-2 text-white">
-                  Your Numerological Profile
+                  {tr.numerology.yourProfile}
                 </h2>
                 <p className="text-sm text-gray-300">
                   <span>{result.fullName}</span>
@@ -1072,7 +1064,7 @@ const Numerology = () => {
                   variant="outline"
                   className="mt-3 border-purple-400/50 text-purple-300 hover:bg-purple-500/10 px-4 py-2 text-sm"
                 >
-                  Calculate Another Reading
+                  {tr.numerology.calculateAnother}
                 </Button>
               </div>
 
@@ -1080,32 +1072,32 @@ const Numerology = () => {
               <Card className="glass-card border-purple-500/30 hover:border-purple-400/50 shadow-xl hover:shadow-purple-500/20 rounded-2xl mx-4 mb-6 transition-all duration-300">
                 <CardHeader className="text-center pb-3">
                   <CardTitle className="text-lg font-bold text-white">
-                    Calculated Numbers
+                    {tr.numerology.calculatedNumbers}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-5">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
                       {
-                        title: "Life Path",
+                        title: tr.numerology.lifePath,
                         number: result.lifePathNumber,
                         color: "from-purple-600 to-blue-600",
                         icon: Target,
                       },
                       {
-                        title: "Destiny",
+                        title: tr.numerology.destiny,
                         number: result.destinyNumber,
                         color: "from-blue-600 to-indigo-600",
                         icon: Crown,
                       },
                       {
-                        title: "Soul",
+                        title: tr.numerology.soul,
                         number: result.soulNumber,
                         color: "from-pink-600 to-rose-600",
                         icon: Heart,
                       },
                       {
-                        title: "Personality",
+                        title: tr.numerology.personality,
                         number: result.personalityNumber,
                         color: "from-green-600 to-emerald-600",
                         icon: Users,
@@ -1159,7 +1151,7 @@ const Numerology = () => {
                       <div>
                         <h4 className="font-medium text-white flex items-center gap-1.5 mb-1.5 text-sm">
                           <Star className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />
-                          Core Description
+                          {tr.numerology.coreDescription}
                         </h4>
                         <p className="text-gray-300 text-xs leading-relaxed">
                           {result.interpretation.description}
@@ -1169,7 +1161,7 @@ const Numerology = () => {
                       <div>
                         <h4 className="font-medium text-white flex items-center gap-1.5 mb-1.5 text-sm">
                           <TrendingUp className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
-                          Career Path
+                          {tr.numerology.careerPath}
                         </h4>
                         <p className="text-gray-300 text-xs">
                           {result.interpretation.career}
@@ -1191,7 +1183,7 @@ const Numerology = () => {
                       <div>
                         <h4 className="font-medium text-white flex items-center gap-1.5 mb-1.5 text-sm">
                           <Zap className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
-                          Core Strengths
+                          {tr.numerology.coreStrengths}
                         </h4>
                         <p className="text-gray-300 text-xs">
                           {result.interpretation.strengths}
@@ -1201,7 +1193,7 @@ const Numerology = () => {
                       <div>
                         <h4 className="font-medium text-white flex items-center gap-1.5 mb-1.5 text-sm">
                           <Target className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
-                          Life Challenges
+                          {tr.numerology.lifeChallenges}
                         </h4>
                         <p className="text-gray-300 text-xs">
                           {result.interpretation.challenges}
@@ -1218,7 +1210,7 @@ const Numerology = () => {
                             }}
                           ></div>
                           <p className="text-xs font-medium text-purple-100">
-                            Lucky Color
+                            {tr.numerology.luckyColor}
                           </p>
                           <p className="text-[10px] text-purple-200">
                             {result.interpretation.color}
@@ -1227,7 +1219,7 @@ const Numerology = () => {
                         <div className="text-center p-2.5 bg-gradient-to-br from-amber-900/30 to-yellow-900/30 rounded-lg">
                           <Sparkles className="w-5 h-5 mx-auto mb-1 text-amber-400" />
                           <p className="text-xs font-medium text-purple-100">
-                            Element
+                            {tr.numerology.element}
                           </p>
                           <p className="text-[10px] text-purple-200">
                             {result.interpretation.element}
@@ -1243,7 +1235,7 @@ const Numerology = () => {
                       <CardHeader className="pb-2 pt-3">
                         <CardTitle className="text-sm text-white flex items-center gap-1.5">
                           <Users className="w-3.5 h-3.5 text-blue-400" />
-                          Compatible Numbers
+                          {tr.numerology.compatibleNumbers}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="pt-0 pb-3">
@@ -1266,7 +1258,7 @@ const Numerology = () => {
                       <CardHeader className="pb-2 pt-3">
                         <CardTitle className="text-sm text-white flex items-center gap-1.5">
                           <Star className="w-3.5 h-3.5 text-amber-400" />
-                          Lucky Numbers
+                          {tr.numerology.luckyNumbers}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="pt-0 pb-3">
@@ -1302,7 +1294,7 @@ const Numerology = () => {
                       ) : (
                       <Download className="h-3.5 w-3.5 mr-1.5" />
                       )}
-                    {isDownloading ? "..." : "Download"}
+                    {isDownloading ? "..." : tr.numerology.download}
                     </Button>
 
                     <Button
@@ -1332,7 +1324,7 @@ const Numerology = () => {
                       ) : (
                       <FileText className="h-3.5 w-3.5 mr-1.5" />
                       )}
-                    Report
+                    {tr.numerology.report}
                     </Button>
 
                     <Button
@@ -1342,7 +1334,7 @@ const Numerology = () => {
                     size="sm"
                     >
                     <Copy className="h-3.5 w-3.5 mr-1.5" />
-                    Copy
+                    {tr.numerology.copy}
                     </Button>
                 </div>
               </div>

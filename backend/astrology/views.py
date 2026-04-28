@@ -142,7 +142,8 @@ class GenerateReadingView(views.APIView):
         try:
             # In eager mode (development), this runs synchronously
             # In production with Celery workers, this is queued
-            generate_astrology_reading.delay(str(session.session_id))
+            language = request.data.get("language", "en")
+            generate_astrology_reading.delay(str(session.session_id), language)
         except Exception as exc:
             # If task fails immediately (e.g., in eager mode), log and return error
             import logging

@@ -14,6 +14,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import StatusCheck from "@/components/StatusCheck";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Register GSAP plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -247,6 +248,7 @@ const AnimatedFooterImages = () => {
 };
 
 const Index = () => {
+  const { tr } = useLanguage();
   const indexRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -351,36 +353,23 @@ const Index = () => {
                 
                 {/* Description */}
                 <p className="mb-4 sm:mb-6 text-xs sm:text-sm text-gray-400 leading-relaxed px-2">
-                  Unlock your destiny through ancient wisdom of palmistry, numerology, and astrology, powered by AI.
+                  {tr.footer.description}
                 </p>
-                
-                {/* Links */}
                 <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mb-4 sm:mb-6 px-2">
-                  <a 
-                    href="#" 
-                    className="text-xs sm:text-sm text-gray-400 hover:text-purple-400 transition-colors duration-200 touch-manipulation"
-                  >
-                    Privacy Policy
+                  <a href="#" className="text-xs sm:text-sm text-gray-400 hover:text-purple-400 transition-colors duration-200 touch-manipulation">
+                    {tr.footer.privacyPolicy}
                   </a>
                   <span className="text-gray-600 text-xs">•</span>
-                  <a 
-                    href="#" 
-                    className="text-xs sm:text-sm text-gray-400 hover:text-blue-400 transition-colors duration-200 touch-manipulation"
-                  >
-                    Terms of Service
+                  <a href="#" className="text-xs sm:text-sm text-gray-400 hover:text-blue-400 transition-colors duration-200 touch-manipulation">
+                    {tr.footer.termsOfService}
                   </a>
                   <span className="text-gray-600 text-xs">•</span>
-                  <a 
-                    href="#" 
-                    className="text-xs sm:text-sm text-gray-400 hover:text-amber-400 transition-colors duration-200 touch-manipulation"
-                  >
-                    Contact Us
+                  <a href="#" className="text-xs sm:text-sm text-gray-400 hover:text-amber-400 transition-colors duration-200 touch-manipulation">
+                    {tr.footer.contactUs}
                   </a>
                 </div>
-                
-                {/* Copyright */}
                 <div className="text-[10px] sm:text-xs text-gray-500">
-                  © 2024 PalmAstro. All rights reserved.
+                  {tr.footer.copyright}
                 </div>
               </div>
             </div>

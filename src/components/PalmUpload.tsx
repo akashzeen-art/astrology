@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ import { cn } from "@/components/ui/utils";
 import gsap from "gsap";
 
 const PalmUpload = () => {
+  const { tr } = useLanguage();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -296,7 +298,7 @@ const PalmUpload = () => {
         <CardHeader className="pb-2 sm:pb-3">
           <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-white text-sm sm:text-base">
             <Hand className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-400" />
-            How to Take Your Palm Photo
+            {tr.palm.howToTake}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -305,22 +307,22 @@ const PalmUpload = () => {
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
                 <Camera className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400" />
               </div>
-              <p className="font-medium text-white text-xs sm:text-sm mb-0.5 sm:mb-1">Good Lighting</p>
-              <p className="text-[10px] sm:text-xs text-gray-400 leading-tight">Use natural light or a bright lamp</p>
+              <p className="font-medium text-white text-xs sm:text-sm mb-0.5 sm:mb-1">{tr.palm.goodLighting}</p>
+              <p className="text-[10px] sm:text-xs text-gray-400 leading-tight">{tr.palm.goodLightingDesc}</p>
             </div>
             <div className="text-center p-2 sm:p-3 rounded-lg hover:bg-blue-500/10 transition-colors">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
                 <Hand className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
               </div>
-              <p className="font-medium text-white text-xs sm:text-sm mb-0.5 sm:mb-1">Open Palm</p>
-              <p className="text-[10px] sm:text-xs text-gray-400 leading-tight">Keep your palm flat and fingers spread</p>
+              <p className="font-medium text-white text-xs sm:text-sm mb-0.5 sm:mb-1">{tr.palm.openPalm}</p>
+              <p className="text-[10px] sm:text-xs text-gray-400 leading-tight">{tr.palm.openPalmDesc}</p>
             </div>
             <div className="text-center p-2 sm:p-3 rounded-lg hover:bg-amber-500/10 transition-colors">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
                 <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" />
               </div>
-              <p className="font-medium text-white text-xs sm:text-sm mb-0.5 sm:mb-1">Clear Focus</p>
-              <p className="text-[10px] sm:text-xs text-gray-400 leading-tight">Ensure palm lines are clearly visible</p>
+              <p className="font-medium text-white text-xs sm:text-sm mb-0.5 sm:mb-1">{tr.palm.clearFocus}</p>
+              <p className="text-[10px] sm:text-xs text-gray-400 leading-tight">{tr.palm.clearFocusDesc}</p>
             </div>
           </div>
         </CardContent>
@@ -427,10 +429,10 @@ const PalmUpload = () => {
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">
-                    Take Photo or Upload Image
+                    {tr.palm.takePhotoTitle}
                   </h3>
                   <p className="text-xs sm:text-sm text-gray-400 mb-4 sm:mb-5">
-                    Click to use your camera or select an existing photo from your device
+                    {tr.palm.takePhotoDesc}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center w-full sm:w-auto">
                     <Button
@@ -440,7 +442,7 @@ const PalmUpload = () => {
                       size="lg"
                     >
                       <Camera className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
-                      Direct Camera
+                      {tr.palm.directCamera}
                     </Button>
                     <Button
                       onClick={triggerGallery}
@@ -449,7 +451,7 @@ const PalmUpload = () => {
                       size="lg"
                     >
                       <FileImage className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
-                      Gallery Upload
+                      {tr.palm.galleryUpload}
                     </Button>
                   </div>
                 </div>
@@ -574,9 +576,9 @@ const PalmUpload = () => {
           <div className="flex items-start gap-2 sm:gap-3">
             <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-white text-xs sm:text-sm mb-0.5 sm:mb-1">Privacy & Security</p>
+              <p className="font-medium text-white text-xs sm:text-sm mb-0.5 sm:mb-1">{tr.palm.privacySecurity}</p>
               <p className="text-[10px] sm:text-xs text-gray-400 leading-relaxed">
-                Your images are processed securely and automatically deleted after analysis. We never store or share your personal photos.
+                {tr.palm.privacySecurityDesc}
               </p>
             </div>
           </div>
